@@ -12,7 +12,7 @@ class VietorisRipsComplex:
         self.radius = radius
         self.metric = metric
         self.graph = self.construct_graph()
-        self.simplices = self.find_simplices()
+        self.simplices = self.get_simplices()
 
     def construct_graph(self):
         graph = nx.Graph()
@@ -22,19 +22,36 @@ class VietorisRipsComplex:
                 graph.add_edge(i, j)
         return graph
 
-    def find_simplices(self):
+    def get_simplices(self):
         cliques = list(nx.find_cliques(self.graph))
-        simplices = [tuple(sorted(clique)) for clique in cliques]
+        simplices = [set(sorted(clique)) for clique in cliques]
         return simplices
 
     def get_faces(self, dimension):
         if dimension == 0:
-            return self.point_names
+            return [set(face) for face in self.point_names]
         else:
             length_of_simplices = dimension + 1
             higher_simplices = [simplex for simplex in self.simplices if len(simplex) >= length_of_simplices]
             faces = []
             for simplex in higher_simplices:
                 for face in combinations(simplex, length_of_simplices):
-                    faces.append(tuple(face))
+                    faces.append(set(face))
             return faces
+    
+    def boundary_matrix(self, dimension):
+        boundary_matrix = []
+        d_simplices = self.get_faces(dimension)
+        faces = self.get_faces(dimension - 1)
+        
+        for simplex in d_simplices:
+            boundary = []
+            faces_of_simplex = combinations(simplex, dimension - 1)
+            for face in faces:
+                if set(face).issubset(set(simplex)):
+                    boundary.append(1)
+                else:
+                    boundary.append(0)
+            boundary_matrix.append(boundary)
+        
+        return np.array(boundary_matrix)
