@@ -46,7 +46,6 @@ class VietorisRipsComplex:
         
         for simplex in d_simplices:
             boundary = []
-            faces_of_simplex = combinations(simplex, dimension - 1)
             for face in faces:
                 if set(face).issubset(set(simplex)):
                     boundary.append(1)
