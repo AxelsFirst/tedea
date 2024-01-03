@@ -24,27 +24,27 @@ class VietorisRipsComplex:
 
     def get_simplices(self):
         cliques = list(nx.find_cliques(self.graph))
-        simplices = [set(sorted(clique)) for clique in cliques]
+        simplices = sorted([list(sorted(clique)) for clique in cliques])
         return simplices
 
     def get_p_simplices(self, dim):
         if dim == 0:
-            return [set(face) for face in self.vertex_names]
+            return [list(face) for face in self.vertex_names]
         else:
             length_of_simplices = dim + 1
             higher_simplices = [simplex for simplex in self.simplices if len(simplex) >= length_of_simplices]
             faces = []
             for simplex in higher_simplices:
                 for face in combinations(simplex, length_of_simplices):
-                    faces.append(set(face))
-            return faces
+                    faces.append(list(face))
+            return sorted(faces)
     
     def boundary_matrix(self, dim):
         boundary_matrix = []
-        d_simplices = self.get_p_simplices(dim)
+        p_simplices = self.get_p_simplices(dim)
         faces = self.get_p_simplices(dim - 1)
         
-        for simplex in d_simplices:
+        for simplex in p_simplices:
             boundary = []
             for face in faces:
                 if set(face).issubset(set(simplex)):
@@ -53,4 +53,4 @@ class VietorisRipsComplex:
                     boundary.append(0)
             boundary_matrix.append(boundary)
         
-        return np.array(boundary_matrix)
+        return np.transpose(np.array(boundary_matrix))
