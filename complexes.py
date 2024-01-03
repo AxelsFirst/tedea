@@ -6,9 +6,9 @@ def euclidean_metric(p1, p2):
     return np.linalg.norm(np.array(p1) - np.array(p2))
 
 class VietorisRipsComplex:
-    def __init__(self, points, radius, point_names=None, metric=euclidean_metric):
-        self.point_names = point_names or [str(i) for i in range(len(self.points))]
-        self.points = dict(zip(self.point_names, points))
+    def __init__(self, vertices, radius, vertex_names=None, metric=euclidean_metric):
+        self.vertex_names = vertex_names or [str(i) for i in range(len(self.vertices))]
+        self.vertices = dict(zip(self.vertex_names, vertices))
         self.radius = radius
         self.metric = metric
         self.graph = self.construct_graph()
@@ -16,9 +16,9 @@ class VietorisRipsComplex:
 
     def construct_graph(self):
         graph = nx.Graph()
-        graph.add_nodes_from(self.point_names)
-        for i, j in combinations(self.point_names, 2):
-            if self.metric(self.points[i], self.points[j]) <= self.radius:
+        graph.add_nodes_from(self.vertex_names)
+        for i, j in combinations(self.vertex_names, 2):
+            if self.metric(self.vertices[i], self.vertices[j]) <= self.radius:
                 graph.add_edge(i, j)
         return graph
 
@@ -27,11 +27,11 @@ class VietorisRipsComplex:
         simplices = [set(sorted(clique)) for clique in cliques]
         return simplices
 
-    def get_faces(self, dimension):
-        if dimension == 0:
-            return [set(face) for face in self.point_names]
+    def get_p_simplices(self, dim):
+        if dim == 0:
+            return [set(face) for face in self.vertex_names]
         else:
-            length_of_simplices = dimension + 1
+            length_of_simplices = dim + 1
             higher_simplices = [simplex for simplex in self.simplices if len(simplex) >= length_of_simplices]
             faces = []
             for simplex in higher_simplices:
@@ -39,10 +39,10 @@ class VietorisRipsComplex:
                     faces.append(set(face))
             return faces
     
-    def boundary_matrix(self, dimension):
+    def boundary_matrix(self, dim):
         boundary_matrix = []
-        d_simplices = self.get_faces(dimension)
-        faces = self.get_faces(dimension - 1)
+        d_simplices = self.get_p_simplices(dim)
+        faces = self.get_p_simplices(dim - 1)
         
         for simplex in d_simplices:
             boundary = []
