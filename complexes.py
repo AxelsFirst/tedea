@@ -1,5 +1,6 @@
 import networkx as nx
 import numpy as np
+import galois as gl
 from itertools import combinations
 
 def euclidean_metric(p1, p2):
@@ -13,6 +14,8 @@ class VietorisRipsComplex:
         self.metric = metric
         self.graph = self.construct_graph()
         self.simplices = self.get_simplices()
+        self.dim = max(len(simplex) for simplex in self.simplices) - 1
+        self.field = gl.GF(2)
 
     def construct_graph(self):
         graph = nx.Graph()
@@ -30,6 +33,8 @@ class VietorisRipsComplex:
     def get_p_simplices(self, dim):
         if dim == 0:
             return [list(face) for face in self.vertex_names]
+        elif dim < 0 or dim > self.dim:
+            return [[]]
         else:
             length_of_simplices = dim + 1
             higher_simplices = [simplex for simplex in self.simplices if len(simplex) >= length_of_simplices]
@@ -39,10 +44,25 @@ class VietorisRipsComplex:
                     faces.append(list(face))
             return sorted(faces)
     
-    def boundary_matrix(self, dim):
-        boundary_matrix = []
+    def get_p_boundary_matrix(self, dim):
         p_simplices = self.get_p_simplices(dim)
         faces = self.get_p_simplices(dim - 1)
+
+        if p_simplices == [[]] and faces == [[]]:
+            boundary_matrix = self.field([[0]])
+            return boundary_matrix
+
+        elif p_simplices == [[]]:
+            boundary_matrix = self.field(np.zeros(len(faces), dtype=int))
+            boundary_matrix = boundary_matrix.reshape([len(faces), 1])
+            return boundary_matrix
+
+        elif faces == [[]]:
+            boundary_matrix = self.field(np.zeros(len(p_simplices), dtype=int))
+            boundary_matrix = boundary_matrix.reshape([1, len(p_simplices)])
+            return boundary_matrix
+
+        boundary_matrix = []
         
         for simplex in p_simplices:
             boundary = []
@@ -53,4 +73,14 @@ class VietorisRipsComplex:
                     boundary.append(0)
             boundary_matrix.append(boundary)
         
-        return np.transpose(np.array(boundary_matrix))
+        return np.transpose(self.field(boundary_matrix))
+    
+    def get_p_betti(self, dim):
+        p_boundary_matrix = self.get_p_boundary_matrix(dim)
+        p1_boundary_matrix = self.get_p_boundary_matrix(dim+1)
+
+        zero = self.field([[0]])
+        if np.array_equal(p_boundary_matrix, zero) and np.array_equal(p1_boundary_matrix, zero):
+            return 0
+
+        return p_boundary_matrix.shape[1] - np.linalg.matrix_rank(p_boundary_matrix) - np.linalg.matrix_rank(p1_boundary_matrix)
