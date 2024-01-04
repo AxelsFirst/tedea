@@ -84,3 +84,6 @@ class VietorisRipsComplex:
             return 0
 
         return p_boundary_matrix.shape[1] - np.linalg.matrix_rank(p_boundary_matrix) - np.linalg.matrix_rank(p1_boundary_matrix)
+
+    def get_betti(self):
+        return [self.get_p_betti(p) for p in range(self.dim+1)]
