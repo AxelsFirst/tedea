@@ -27,8 +27,8 @@ class VietorisRipsComplex:
 
     def get_simplices(self):
         cliques = list(nx.find_cliques(self.graph))
-        simplices = sorted([list(sorted(clique)) for clique in cliques])
-        return simplices
+        simplices = [list(sorted(clique)) for clique in cliques]
+        return sorted(simplices, key=lambda simplex: (len(simplex), simplex[0]))
 
     def get_p_simplices(self, dim):
         if dim == 0:
@@ -41,7 +41,7 @@ class VietorisRipsComplex:
             for simplex in higher_simplices:
                 for face in combinations(simplex, dim + 1):
                     faces.append(list(face))
-            return sorted(faces)
+            return sorted(faces, key=lambda face: face[0])
     
     def get_all_simplices(self):
         simplices = [tuple(vertex) for vertex in self.vertex_names]
@@ -52,7 +52,8 @@ class VietorisRipsComplex:
                     simplices.append(face)
         
         simplices = list(set(simplices))
-        return sorted([list(simplex) for simplex in simplices])
+        simplices = [list(simplex) for simplex in simplices]
+        return sorted(simplices, key=lambda simplex: (len(simplex), simplex[0]))
     
     def get_p_boundary_matrix(self, dim):
         p_simplices = self.get_p_simplices(dim)
