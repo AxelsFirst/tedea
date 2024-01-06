@@ -21,7 +21,7 @@ class VietorisRipsComplex:
         graph = nx.Graph()
         graph.add_nodes_from(self.vertex_names)
         for i, j in combinations(self.vertex_names, 2):
-            if self.metric(self.vertices[i], self.vertices[j]) <= self.radius:
+            if self.metric(self.vertices[i], self.vertices[j]) <= 2*self.radius:
                 graph.add_edge(i, j)
         return graph
 
@@ -36,13 +36,23 @@ class VietorisRipsComplex:
         elif dim < 0 or dim > self.dim:
             return [[]]
         else:
-            length_of_simplices = dim + 1
-            higher_simplices = [simplex for simplex in self.simplices if len(simplex) >= length_of_simplices]
+            higher_simplices = [simplex for simplex in self.simplices if len(simplex) >= dim + 1]
             faces = []
             for simplex in higher_simplices:
-                for face in combinations(simplex, length_of_simplices):
+                for face in combinations(simplex, dim + 1):
                     faces.append(list(face))
             return sorted(faces)
+    
+    def get_all_simplices(self):
+        simplices = [tuple(vertex) for vertex in self.vertex_names]
+
+        for simplex in self.simplices:
+            for dim in range(1, len(simplex)):
+                for face in combinations(simplex, dim+1):
+                    simplices.append(face)
+        
+        simplices = list(set(simplices))
+        return sorted([list(simplex) for simplex in simplices])
     
     def get_p_boundary_matrix(self, dim):
         p_simplices = self.get_p_simplices(dim)
