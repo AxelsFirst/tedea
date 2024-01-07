@@ -1,5 +1,7 @@
-# from complexes import *
 import matplotlib.pyplot as plt
+from matplotlib.patches import Circle, Polygon
+from matplotlib.collections import PatchCollection
+import random
 
 def plot_2d_complex(complex,
                     fig_width=5,
