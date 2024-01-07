@@ -37,6 +37,20 @@ class VietorisRipsComplex:
     """
 
     def __init__(self, vertices, radius, vertex_names=None, metric=euclidean_metric):
+        """
+        Assigns complex parameters using parsed parameters and initiates calculations.
+
+        Arguments
+        ----------
+        vertices: list of list of float
+                Coordinates of vertices.
+        radius: float
+        vertex_names: list of str or None, default=None
+                    Optional labels of vertices.
+        metric: function
+                Metric used for getting distances between vertices, by default Euclidean metric.
+        """
+
         self.vertex_names = vertex_names or [str(i) for i in range(len(self.vertices))]
         self.vertices = dict(zip(self.vertex_names, vertices))
         self.radius = radius
@@ -56,7 +70,7 @@ class VietorisRipsComplex:
         graph: Graph
                Graph of a simplicial complex.
         """
-        
+
         graph = nx.Graph()
         graph.add_nodes_from(self.vertex_names)
         for i, j in combinations(self.vertex_names, 2):
