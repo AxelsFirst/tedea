@@ -6,6 +6,36 @@ from metrics import euclidean_metric
 
 
 class VietorisRipsComplex:
+    """
+    Representation of a Vietoris-Rips abstract simplicial complex.
+
+    Parameters
+    ----------
+    vertices: list of list of float
+              Coordinates of vertices.
+    radius: float
+    vertex_names: list of str or None, default=None
+                  Optional labels of vertices.
+    metric: function
+            Metric used for getting distances between vertices, by default Euclidean metric.
+
+    Attributes
+    ----------
+    vertex_names: list of str
+                  Labels of vertices, if parsed None then indexes of vertices.
+    vertices: dict
+              Translation of names of vertices to coordinates of vertices.
+    radius: float
+    graph: Graph
+           Graph of a simplicial complex.
+    simplices: list of list of str
+               Unique simplices of a complex, that are not faces of other simplices.
+    dim: int
+         Dimension of simplicial complex.
+    field: FieldArrayMeta
+           Z/2Z field of coefficients of matrices.
+    """
+
     def __init__(self, vertices, radius, vertex_names=None, metric=euclidean_metric):
         self.vertex_names = vertex_names or [str(i) for i in range(len(self.vertices))]
         self.vertices = dict(zip(self.vertex_names, vertices))
@@ -17,6 +47,16 @@ class VietorisRipsComplex:
         self.field = gl.GF(2)
 
     def construct_graph(self):
+        """
+        Contruct a graph of a Vietoris-Rips simplicial complex, adds an edge between two
+        distinct vertices if the distance is smaller than the diameter, ie radius times two.
+
+        Returns
+        -------
+        graph: Graph
+               Graph of a simplicial complex.
+        """
+        
         graph = nx.Graph()
         graph.add_nodes_from(self.vertex_names)
         for i, j in combinations(self.vertex_names, 2):
@@ -25,11 +65,34 @@ class VietorisRipsComplex:
         return graph
 
     def get_simplices(self):
+        """
+        Finds unique simplices of a complex, that are not faces of other simplices.
+
+        Returns
+        -------
+        simplices: list of list of str
+                   Unique simplices of a complex, that are not faces of other simplices.
+        """
+
         cliques = list(nx.find_cliques(self.graph))
         simplices = [list(sorted(clique)) for clique in cliques]
         return sorted(simplices, key=lambda simplex: (len(simplex), simplex[0]))
 
     def get_p_simplices(self, dim):
+        """
+        Finds all p-simplices of a complex, i.e. simplices of p-th dimension.
+
+        Arguments
+        ---------
+        dim: int
+             Dimension p of a p-simplex.
+        
+        Returns
+        -------
+        simplices: list of list of str
+                   All p-simplices of a simplicial complex, i.e. simplices of p-th dimension.
+        """
+
         if dim == 0:
             return [list(face) for face in self.vertex_names]
         elif dim < 0 or dim > self.dim:
@@ -43,6 +106,15 @@ class VietorisRipsComplex:
             return sorted(faces, key=lambda face: face[0])
     
     def get_all_simplices(self):
+        """
+        Finds all simplices of a complex.
+        
+        Returns
+        -------
+        simplices: list of list of str
+                   All simplices of a simplicial complex.
+        """
+
         simplices = [tuple(vertex) for vertex in self.vertex_names]
 
         for simplex in self.simplices:
@@ -55,6 +127,20 @@ class VietorisRipsComplex:
         return sorted(simplices, key=lambda simplex: (len(simplex), simplex[0]))
     
     def get_p_boundary_matrix(self, dim):
+        """
+        Creates a p-th boundary matrix, i.e. a matrix of a p-th boundary operator.
+        
+        Arguments
+        ---------
+        dim: int
+             Dimension p of a p-th boundary operator.
+        
+        Returns
+        -------
+        boundary_matrix: GF(2)
+                         2D array, i.e. matrix with coefficients over Z/2Z.
+        """
+
         p_simplices = self.get_p_simplices(dim)
         faces = self.get_p_simplices(dim - 1)
 
@@ -86,6 +172,20 @@ class VietorisRipsComplex:
         return np.transpose(self.field(boundary_matrix))
     
     def get_p_betti(self, dim):
+        """
+        Calculates p-th Betti number, i.e. dimension of a p-th homology group of a simplicial complex.
+
+        Arguments
+        ---------
+        dim: int
+             Dimension p of a p-th homology group.
+        
+        Returns
+        -------
+        betti: int
+               p-th Betti number.
+        """
+
         p_boundary_matrix = self.get_p_boundary_matrix(dim)
         p1_boundary_matrix = self.get_p_boundary_matrix(dim+1)
 
@@ -96,4 +196,14 @@ class VietorisRipsComplex:
         return p_boundary_matrix.shape[1] - np.linalg.matrix_rank(p_boundary_matrix) - np.linalg.matrix_rank(p1_boundary_matrix)
 
     def get_betti(self):
+        """
+        Returns all relevant Betti numbers of a simplicial complex, that is up to k-th one, 
+        where k is dimension of a simplicial complex.
+
+        Returns
+        -------
+        betti_numbers: list of int
+                       All relevant Betti numbers of a simplicial complex.
+        """
+
         return [self.get_p_betti(p) for p in range(self.dim+1)]
