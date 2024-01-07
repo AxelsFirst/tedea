@@ -2,9 +2,8 @@ import networkx as nx
 import numpy as np
 import galois as gl
 from itertools import combinations
+from metrics import euclidean_metric
 
-def euclidean_metric(p1, p2):
-    return np.linalg.norm(np.array(p1) - np.array(p2))
 
 class VietorisRipsComplex:
     def __init__(self, vertices, radius, vertex_names=None, metric=euclidean_metric):
