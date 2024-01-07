@@ -19,7 +19,10 @@ def plot_2d_complex(complex,
                     file_extension='png',
                     draw_balls=False,
                     ball_alpha=1/5,
-                    ball_color=None):
+                    ball_color=None,
+                    draw_simplices=False,
+                    simplex_alpha=1/5,
+                    simplex_color=None):
 
     fig, ax = plt.subplots()
     fig.set_figheight(fig_width)
@@ -52,6 +55,31 @@ def plot_2d_complex(complex,
                             zorder=-1)
 
             ax.add_artist(ball)
+            
+    if draw_simplices:
+        simplices = [simplex for simplex in complex.get_all_simplices() if len(simplex) > 2]
+
+        for dim in range(2, complex.dim+1):
+            p_simplices = [simplex for simplex in simplices if len(simplex) == dim+1]
+            polygons = []
+
+            for simplex in p_simplices:
+                vertices = [complex.vertices[vertex] for vertex in simplex]
+                polygons.append(Polygon(vertices, closed=True, ))
+            
+            patches = PatchCollection(polygons)
+
+            if simplex_color is None:
+                patches.set_color([random.random() for _ in range(3)])
+            if isinstance(simplex_color, dict):
+                patches.set_color(simplex_color[dim])
+            else:
+                patches.set_color(simplex_color)
+            
+            patches.set_zorder(-1)
+            patches.set_alpha(simplex_alpha)
+            
+            ax.add_collection(patches)
 
     plt.tight_layout()
 
