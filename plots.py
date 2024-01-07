@@ -14,7 +14,10 @@ def plot_2d_complex(complex,
                     save_as_file=False,
                     file_directory='',
                     file_name='plot_of_complex',
-                    file_extension='png'):
+                    file_extension='png',
+                    draw_balls=False,
+                    ball_alpha=1/5,
+                    ball_color=None):
 
     fig, ax = plt.subplots()
     fig.set_figheight(fig_width)
@@ -31,7 +34,23 @@ def plot_2d_complex(complex,
             node_color=vertex_background_color,
             edge_color=vertex_border_color,
             edgecolors=edge_color)
-                
+    
+    if draw_balls:
+        for vertex in complex.vertices.values():
+            if ball_color is None:
+                color = [random.random() for _ in range(3)]
+            else:
+                color = ball_color
+
+            ball = Circle(vertex,
+                            radius=complex.radius,
+                            alpha=ball_alpha,
+                            edgecolor=None,
+                            facecolor=color,
+                            zorder=-1)
+
+            ax.add_artist(ball)
+
     plt.tight_layout()
 
     if save_as_file:
