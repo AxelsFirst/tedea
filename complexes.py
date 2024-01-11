@@ -204,10 +204,15 @@ class VietorisRipsComplex:
         p1_boundary_matrix = self.get_p_boundary_matrix(dim+1)
 
         zero = self.field([[0]])
-        if np.array_equal(p_boundary_matrix, zero) and np.array_equal(p1_boundary_matrix, zero):
+        p_zero = np.array_equal(p_boundary_matrix, zero)
+        p1_zero = np.array_equal(p1_boundary_matrix, zero)
+        if p_zero and p1_zero:
             return 0
 
-        return p_boundary_matrix.shape[1] - np.linalg.matrix_rank(p_boundary_matrix) - np.linalg.matrix_rank(p1_boundary_matrix)
+        col_num = p_boundary_matrix.shape[1]
+        p_rank = np.linalg.matrix_rank(p_boundary_matrix)
+        p1_rank = np.linalg.matrix_rank(p1_boundary_matrix)
+        return col_num - p_rank - p1_rank
 
     def get_betti(self):
         """
