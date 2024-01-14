@@ -166,11 +166,18 @@ class Vertex_Addition_Frame(Sidebar_Frame):
         coords_text = self.entry_coords.get()
         coords = coords_text.replace(',', '.').split(' ')
         return coords
+    
+    def clear_entries(self):
+        self.entry_name.delete(0, len(self.entry_name.get()))
+        self.entry_coords.delete(0, len(self.entry_coords.get()))
 
     def vertex_confirmation(self):
         vertex_name = self.entry_name.get()
+        unique_name = self.validate_name(vertex_name)
+        dim_text = self.Sidebar.Dimension_Frame.entry_dimension.get()
+        dim_chosen = self.Sidebar.Dimension_Frame.validate_dimension(dim_text)
         
-        if self.validate_name(vertex_name):
+        if unique_name and dim_chosen:
             self.Main_Window.vertex_names.append(vertex_name)
             self.Main_Window.vertex_coords.append(self.get_coords())
 
@@ -180,6 +187,8 @@ class Vertex_Addition_Frame(Sidebar_Frame):
                 label=vertex_name,
                 command= lambda x=vertex_name: Vertex_List_Frame.waitlist(x)
             )
+
+            self.clear_entries()
 
 
 class Vertex_List_Frame(Sidebar_Frame):
@@ -300,7 +309,7 @@ class Plot_Generation_Frame(Sidebar_Frame):
         self.plot_generation = self.Main_Window.register(self.generate_plot)
         self.button_generation = tb.Button(self, 
                                            bootstyle='success', 
-                                           text='Generate plot'
+                                           text='Generate plot',
                                            command=self.plot_generation)
         self.button_generation.grid(row=0, column=0)
 
