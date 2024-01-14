@@ -1,4 +1,5 @@
 import ttkbootstrap as tb
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from complexes import VietorisRipsComplex
 from plots import plot_2d_complex
 
@@ -342,3 +343,23 @@ class Plot_Generation_Frame(Sidebar_Frame):
                 draw_balls=self.Sidebar.Plot_Config_Frame.draw_balls.get(),
                 draw_simplices=draw_simplices
             )
+
+
+class Main_Frame(tb.Frame):
+    def __init__(self, root, fig, bootstyle='default'):
+        tb.Frame.__init__(self, root, bootstyle=bootstyle)
+
+        self.Plot_Frame = Plot_Frame(self, fig)
+        self.Plot_Frame.pack(fill='both', expand=True, pady=5)
+
+        self.Betti_Frame = Betti_Frame(self)
+        self.Betti_Frame.pack(fill='both', expand=True, pady=5)
+
+
+class Plot_Frame(tb.Labelframe):
+    def __init__(self, root, fig, bootstyle='default'):
+        tb.Labelframe.__init__(self, root, text='Plot', bootstyle='default')
+        
+        canvas = FigureCanvasTkAgg(fig, self)
+        canvas.draw()
+        canvas.get_tk_widget().pack(side='left', fill='both', expand=True)
