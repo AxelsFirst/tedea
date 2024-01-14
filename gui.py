@@ -227,3 +227,45 @@ class Vertex_List_Frame(Sidebar_Frame):
             )
         
         self.menubutton_vertex['menu'] = self.menu_vertex
+
+
+class Metric_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+
+        self.menubutton_metric = tb.Menubutton(self, 
+                                               text='Choose metric', 
+                                               bootstyle='primary')
+        self.menubutton_metric.pack()
+
+        self.menu_metric = tb.Menu(self.menubutton_metric)
+        for metric in ['Euclidean', 'Manhattan', 'Maximum']:
+            self.menu_metric.add_radiobutton(label=metric, 
+                                             command= lambda x=metric: self.set_metric(metric=x))
+
+        self.menubutton_metric['menu'] = self.menu_metric
+
+        self.pack_hidden_separator()
+
+        self.label_radius = tb.Label(self, 
+                                     text='Enter radius:', 
+                                     bootstyle='inverse-light')
+        self.label_radius.pack()
+
+        validation_radius = self.Main_Window.register(self.validate_radius)
+
+        self.entry_radius = tb.Entry(self, 
+                                     validate='focusout', 
+                                     validatecommand=(validation_radius, '%P'))
+        self.entry_radius.pack()
+
+    def set_metric(self, metric):
+        self.menubutton_metric.config(text=metric)
+        self.Main_Window.metric = metric
+
+    def validate_radius(self, radius):
+        radius = radius.replace(',', '').replace('.', '')
+        if radius.isdecimal():
+            return True
+        else:
+            return False
