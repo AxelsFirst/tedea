@@ -98,3 +98,68 @@ class Dimension_Frame(Sidebar_Frame):
             return True
         else:
             return False
+
+
+class Vertex_Addition_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+
+        self.label_name = tb.Label(self, 
+                                   text='Enter vertex label:', 
+                                   bootstyle='inverse-light')
+        self.label_name.pack()
+
+        validation_name = self.Main_Window.register(self.validate_name)
+
+        self.entry_name = tb.Entry(self,
+                                   validate='focusout',
+                                   validatecommand=(validation_name, '%P'))
+        self.entry_name.pack()
+
+        self.pack_hidden_separator()
+
+        self.label_coords = tb.Label(self, 
+                                     text='Enter vertex coordinates:', 
+                                     bootstyle='inverse-light')
+        self.label_coords.pack()
+
+        validation_coords = self.Main_Window.register(self.validate_coords)
+
+        self.entry_coords = tb.Entry(self, 
+                                     validate='focusout', 
+                                     validatecommand=(validation_coords, '%P'))
+        self.entry_coords.pack()
+
+        self.pack_hidden_separator()
+
+        self.button_confirmation = tb.Button(self, 
+                                             text='Confirm vertex', 
+                                             bootstyle='primary', 
+                                             command=self.vertex_confirmation)
+        self.button_confirmation.pack(pady=10)
+
+    def validate_name(self, name):
+        if name in self.Main_Window.vertex_names:
+            return False
+        else:
+            return True
+
+    def validate_coords(self, coords_text):
+        coords = coords_text.replace(',', '').replace('.', '').split(' ')
+        dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
+        
+        if not dim.isdecimal():
+            return False
+        elif len(coords) != int(dim):
+            return False
+        
+        for coord in coords:
+            if not coord.isdecimal():
+                return False
+        
+        return True
+    
+    def get_coords(self):
+        coords_text = self.entry_coords.get()
+        coords = coords_text.replace(',', '.').split(' ')
+        return coords
