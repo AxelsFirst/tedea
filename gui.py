@@ -64,3 +64,18 @@ class Sidebar(tb.Frame):
     def pack_separator(self):
         separator = tb.Separator(self, bootstyle='primary')
         separator.pack(fill='x', padx=15, pady=25)
+
+
+class Sidebar_Frame(tb.Frame):
+    def __init__(self, root, bootstyle='light'):
+        tb.Frame.__init__(self, root, bootstyle=bootstyle)
+        self.Main_Window = root.Main_Window
+        self.Sidebar = root
+    
+    def pack_hidden_separator(self, bootstyle='light'):
+        separator = tb.Separator(self, bootstyle=bootstyle)
+        separator.pack(pady=5)
+    
+    def grid_hidden_separator(self, row, column, columnspan, bootstyle='light'):
+        separator = tb.Separator(self, bootstyle=bootstyle)
+        separator.grid(row=row, column=column, columnspan=columnspan, pady=5)
