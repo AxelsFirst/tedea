@@ -269,3 +269,22 @@ class Metric_Frame(Sidebar_Frame):
             return True
         else:
             return False
+        
+
+class Plot_Config_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+
+        self.Main_Window.draw_graph = tb.BooleanVar()
+        self.toggle_graph = tb.Checkbutton(self, 
+                                           bootstyle="outline-toolbutton", 
+                                           text='Draw graph',
+                                           variable=self.Main_Window.draw_graph)
+        self.toggle_graph.grid(row=0, column=0)
+
+        self.Main_Window.draw_balls = tb.BooleanVar()
+        self.toggle_balls = tb.Checkbutton(self, 
+                                           bootstyle="outline-toolbutton", 
+                                           text='Draw balls',
+                                           variable=self.Main_Window.draw_balls)
+        self.toggle_balls.grid(row=0, column=1)
