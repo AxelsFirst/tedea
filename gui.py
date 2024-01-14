@@ -148,7 +148,7 @@ class Vertex_Addition_Frame(Sidebar_Frame):
             return True
 
     def validate_coords(self, coords_text):
-        coords = coords_text.replace(',', '').replace('.', '').split(' ')
+        coords = coords_text.replace(',', '').split(' ')
         dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
         
         if not dim.isdecimal():
@@ -157,8 +157,11 @@ class Vertex_Addition_Frame(Sidebar_Frame):
             return False
         
         for coord in coords:
-            if not coord.isdecimal():
+            if not coord.replace('.', '').isdecimal():
                 return False
+        
+        if coords in self.Main_Window.vertex_coords:
+            return False
         
         return True
     
