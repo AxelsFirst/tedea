@@ -19,18 +19,32 @@ class Main_Window(tb.Window):
             'Euclidean': euclidean_metric
         }
         self.complex = None
-        self.fig = None
-        self.ax = None
         self.betti = None
-
         self.fig, self.ax = subplots()
-        
+
+        self.startup_complex_plot()
+
         self.Sidebar = Sidebar(self)
         self.Sidebar.pack(side='left', fill='y')
 
         self.Main_Frame = Main_Frame(self)
         self.Main_Frame.pack(fill='both', expand=True, padx=10, pady=10)
     
+    def startup_complex_plot(self):
+        vertex_names = ["A", "B", "C", "D", "E", "F"]
+        vertices = [(0, 0), (1, 0), (0, 1), (2, 1), (1, 2), (0.4, 0.4)]
+        radius = 0.75
+
+        vr_complex = VietorisRipsComplex(vertices=vertices, 
+                                        radius=radius,
+                                        vertex_names=vertex_names)
+
+        self.fig, self.ax = plot_2d_complex(vr_complex, 
+                                            fig=self.fig, 
+                                            ax=self.ax, 
+                                            return_fig=True,
+                                            show_plot=False)
+
     def convert_coords_to_float(self):
         return [[float(coord) for coord in vertex] for vertex in self.vertex_coords]
 
@@ -375,6 +389,8 @@ class Plot_Generation_Frame(Sidebar_Frame):
             self.Main_Window.Main_Frame.Plot_Frame.update_canvas()
 
             self.Main_Window.betti = self.Main_Window.complex.get_betti()
+
+            self.Main_Window.Main_Frame.Betti_Frame.update_betti()
     
     def save_plot(self):
         if self.fig == None:
@@ -432,3 +448,23 @@ class Plot_Frame(tb.Labelframe):
         self.canvas.draw()
         self.canvas_widget = self.canvas.get_tk_widget()
         self.canvas_widget.pack(side='left', fill='both', expand=True)
+
+
+class Betti_Frame(tb.LabelFrame):
+    def __init__(self, root, text='Betti numbers', bootstyle='default'):
+        tb.LabelFrame.__init__(self, root, text=text, bootstyle=bootstyle)
+        self.Main_Window = root.Main_Window
+
+        self.betti_label = tb.Label(self, text='')
+        self.betti_label.pack()
+
+    def update_betti(self):
+        betti = self.Main_Window.betti
+        
+        for i in range(len(betti)-1):
+            betti[i] = f'{betti[i]} '
+        betti[-1] = f'{betti[-1]}'
+
+        betti_txt = ''.join(betti)
+
+        self.betti_label.config(text=betti_txt)
