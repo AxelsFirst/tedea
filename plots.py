@@ -248,17 +248,22 @@ def plot_3d_complex(complex,
     for dim in range(2, complex.dim+1):
         p_simplices = [simplex for simplex in simplices if len(simplex) == dim+1]
         p_simplices_coords = [[complex.vertices[vertex] for vertex in simplex] for simplex in p_simplices]
-        p_simplices_collection = Poly3DCollection(p_simplices_coords)
-        
-        if simplex_color is None:
-            p_simplices_collection.set_color([random.random() for _ in range(3)])
-        elif isinstance(simplex_color, dict):
-            p_simplices_collection.set_color(simplex_color[dim])
-        else:
-            p_simplices_collection.set_color(simplex_color)
 
-        p_simplices_collection.set_alpha(simplex_alpha)
-        ax.add_collection3d(p_simplices_collection)
+        if simplex_color is None:
+            color = [random.random() for _ in range(3)]
+        
+        for p_simplex in p_simplices_coords:
+            p_simplex = np.array(p_simplex)
+            s_x = p_simplex[:, 0]
+            s_y = p_simplex[:, 1]
+            s_z = p_simplex[:, 2]
+
+            if simplex_color is None:
+                ax.plot_trisurf(s_x, s_y, s_z, color=color, alpha=simplex_alpha)
+            elif isinstance(simplex_color, dict):
+                ax.plot_trisurf(s_x, s_y, s_z, color=simplex_color[dim], alpha=simplex_alpha)
+            else:
+                ax.plot_trisurf(s_x, s_y, s_z, color=simplex_color, alpha=simplex_alpha)
 
     if show_plot:
         plt.show()
