@@ -237,12 +237,6 @@ def plot_3d_complex(complex,
         v2_x, v2_y, v2_z = complex.vertices[vertex_2]
         ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color='black')
 
-    edges = np.array(complex.graph.edges)
-    for vertex_1, vertex_2 in edges:
-        v1_x, v1_y, v1_z = complex.vertices[vertex_1]
-        v2_x, v2_y, v2_z = complex.vertices[vertex_2]
-        ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color='black')
-
     simplices = [simplex for simplex in complex.simplices if len(simplex) > 2]
 
     for dim in range(2, complex.dim+1):
