@@ -79,3 +79,22 @@ class Sidebar_Frame(tb.Frame):
     def grid_hidden_separator(self, row, column, columnspan, bootstyle='light'):
         separator = tb.Separator(self, bootstyle=bootstyle)
         separator.grid(row=row, column=column, columnspan=columnspan, pady=5)
+
+
+class Dimension_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+
+        label_dimension = tb.Label(self, text='Enter dimension of vertices:', bootstyle='inverse-light')
+        label_dimension.pack()
+
+        validation_dimension = self.Main_Window.register(self.validate_dimension)
+
+        self.entry_dimension = tb.Entry(self, validate='focusout', validatecommand=(validation_dimension, '%P'))
+        self.entry_dimension.pack()
+    
+    def validate_dimension(self, dim):
+        if dim.isdecimal():
+            return True
+        else:
+            return False
