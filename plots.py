@@ -1,9 +1,13 @@
 import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Polygon
 from matplotlib.collections import PatchCollection
+import networkx as nx
 import random
 
 def plot_2d_complex(complex,
+                    fig=None,
+                    ax=None,
+                    show_plot=True,
                     fig_width=5,
                     fig_height=5,
                     fig_dpi=150,
@@ -22,7 +26,8 @@ def plot_2d_complex(complex,
                     ball_color=None,
                     draw_simplices=True,
                     simplex_alpha=0.2,
-                    simplex_color=None):
+                    simplex_color=None,
+                    return_fig=True):
     """
     Generates and shows a matplotlib figure of a 2D plot of a simplicial complex.
 
@@ -72,8 +77,8 @@ def plot_2d_complex(complex,
                    share same color. If dict of dimensions p of p-simplices onto colors 
                    then simplices have color assigned by dict.
     """
-
-    fig, ax = plt.subplots()
+    if fig is None or ax is None:
+        fig, ax = plt.subplots()
     fig.set_figheight(fig_width)
     fig.set_figwidth(fig_height)
     fig.set_dpi(fig_dpi)
@@ -133,6 +138,8 @@ def plot_2d_complex(complex,
     plt.tight_layout()
 
     if save_as_file:
-            plt.savefig(f'{file_directory}{file_name}.{file_extension}')
-    else:
+        plt.savefig(f'{file_directory}{file_name}.{file_extension}')
+    if show_plot:
         plt.show()
+    if return_fig:
+        return fig, ax
