@@ -133,7 +133,7 @@ def plot_2d_complex(complex,
 
             if simplex_color is None:
                 patches.set_color([random.random() for _ in range(3)])
-            if isinstance(simplex_color, dict):
+            elif isinstance(simplex_color, dict):
                 patches.set_color(simplex_color[dim])
             else:
                 patches.set_color(simplex_color)
@@ -159,8 +159,6 @@ def plot_3d_complex(complex,
                     fig_width=5,
                     fig_height=5,
                     fig_dpi=150,
-                    with_labels=False,
-                    font_size=8,
                     vertex_size=150,
                     vertex_interior_color='#fff',
                     vertex_border_color='#000',
@@ -169,9 +167,6 @@ def plot_3d_complex(complex,
                     file_directory='',
                     file_name='plot_of_complex',
                     file_extension='png',
-                    draw_balls=False,
-                    ball_alpha=0.2,
-                    ball_color=None,
                     draw_simplices=True,
                     simplex_alpha=0.2,
                     simplex_color=None,
@@ -193,10 +188,6 @@ def plot_3d_complex(complex,
                 Height of a matplotlib figure.
     fig_dpi: float, default=150
              DPI of a matplotlib figure.
-    with_labels: bool, default=False
-                 If True then labels are placed on vertices.
-    font_size: int, default=8
-               Font size of labels of vertices.
     vertex_size: float, default=150
                  Size of circles representing vertices.
     vertex_interior_color: str or list of float, default='#fff'
@@ -214,12 +205,6 @@ def plot_3d_complex(complex,
     file_extension: str, default='png'
                     Plot file extension, for list of supported extensions 
                     refer to matplotlib documentation.
-    draw_balls: bool, default=False
-                If True then draws balls of radius of a simplicial complex.
-    ball_alpha: float, default=0.2
-                Value corresponding to transparency of balls.
-    ball_color: None or float, default=None
-                Color of balls. If None then color is randomized.
     draw_simplices: bool, default=True
                     If True then draws a plot of a simplicial complex by highlighting simplices.
                     If False then draws graph of a simplicial complex by omitting simplices.
@@ -252,5 +237,30 @@ def plot_3d_complex(complex,
         v2_x, v2_y, v2_z = complex.vertices[vertex_2]
         ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color='black')
 
+    edges = np.array(complex.graph.edges)
+    for vertex_1, vertex_2 in edges:
+        v1_x, v1_y, v1_z = complex.vertices[vertex_1]
+        v2_x, v2_y, v2_z = complex.vertices[vertex_2]
+        ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color='black')
+
+    simplices = [simplex for simplex in complex.simplices if len(simplex) > 2]
+
+    for dim in range(2, complex.dim+1):
+        p_simplices = [simplex for simplex in simplices if len(simplex) == dim+1]
+        p_simplices_coords = [[complex.vertices[vertex] for vertex in simplex] for simplex in p_simplices]
+        p_simplices_collection = Poly3DCollection(p_simplices_coords)
+        
+        if simplex_color is None:
+            p_simplices_collection.set_color([random.random() for _ in range(3)])
+        elif isinstance(simplex_color, dict):
+            p_simplices_collection.set_color(simplex_color[dim])
+        else:
+            p_simplices_collection.set_color(simplex_color)
+
+        p_simplices_collection.set_alpha(simplex_alpha)
+        ax.add_collection3d(p_simplices_collection)
+
     if show_plot:
         plt.show()
+    if return_fig:
+        return fig, ax
