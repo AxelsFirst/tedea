@@ -1,4 +1,6 @@
 import ttkbootstrap as tb
+from complexes import VietorisRipsComplex
+from plots import plot_2d_complex
 
 
 class Main_Window(tb.Window):
@@ -288,3 +290,55 @@ class Plot_Config_Frame(Sidebar_Frame):
                                            text='Draw balls',
                                            variable=self.Main_Window.draw_balls)
         self.toggle_balls.grid(row=0, column=1)
+
+
+class Plot_Generation_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+
+        self.plot_generation = self.Main_Window.register(self.generate_plot)
+        self.button_generation = tb.Button(self, 
+                                           bootstyle='success', 
+                                           text='Generate plot'
+                                           command=self.plot_generation)
+        self.button_generation.grid(row=0, column=0)
+
+        self.plot_saving = self.Main_Window.register(self.save_plot)
+        self.button_save = tb.Button(self, 
+                                     bootstyle='primary', 
+                                     text='Save plot',
+                                     command=self.plot_saving)
+        self.button_save.grid(row=0, column=1)
+
+        self.grid_hidden_separator(row=1, column=1, columnspan=2)
+
+    def generate_plot(self):
+        radius = self.Sidebar.Metric_Frame.entry_radius.get()
+
+        if self.Sidebar.Metric_Frame.validate_radius(radius):
+            self.complex = VietorisRipsComplex(
+                vertices=self.Main_Window.vertex_coords,
+                vertex_names=self.Main_Window.vertex_names,
+                radius=radius,
+                metric=self.Main_Window.metric)
+            
+            draw_simplices=not self.Sidebar.Plot_Config_Frame.draw_graph.get()
+            self.fig = plot_2d_complex(
+                self.complex,
+                draw_balls=self.Sidebar.Plot_Config_Frame.draw_balls.get(),
+                draw_simplices=draw_simplices
+            )
+
+            self.Main_Window.betti = self.complex.get_betti()
+    
+    def save_plot(self):
+        if self.fig == None:
+            self.generate_plot()
+        else:
+            draw_simplices=not self.Sidebar.Plot_Config_Frame.draw_graph.get()
+            plot_2d_complex(
+                self.complex,
+                save_as_file=True,
+                draw_balls=self.Sidebar.Plot_Config_Frame.draw_balls.get(),
+                draw_simplices=draw_simplices
+            )
