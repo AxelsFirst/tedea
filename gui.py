@@ -163,3 +163,67 @@ class Vertex_Addition_Frame(Sidebar_Frame):
         coords_text = self.entry_coords.get()
         coords = coords_text.replace(',', '.').split(' ')
         return coords
+
+    def vertex_confirmation(self):
+        vertex_name = self.entry_name.get()
+        
+        if self.validate_name(vertex_name):
+            self.Main_Window.vertex_names.append(vertex_name)
+            self.Main_Window.vertex_coords.append(self.get_coords())
+
+            Vertex_List_Frame = self.Sidebar.Vertex_List_Frame
+
+            Vertex_List_Frame.menu_vertex.add_checkbutton(
+                label=vertex_name,
+                command= lambda x=vertex_name: Vertex_List_Frame.waitlist(x)
+            )
+
+
+class Vertex_List_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+        self.vertices_to_delete = []
+
+        self.menubutton_vertex = tb.Menubutton(self, 
+                                               text='Added vertices', 
+                                               bootstyle='primary')
+        self.menubutton_vertex.pack()
+
+        self.menu_vertex = tb.Menu(self.menubutton_vertex)
+
+        self.menubutton_vertex['menu'] = self.menu_vertex # create a function to refresh it every new vertex
+
+        self.pack_hidden_separator()
+
+        self.button_deletion = tb.Button(self, 
+                                         text='Delete vertices', 
+                                         bootstyle='primary',
+                                         command=self.vertex_deletion)
+        self.button_deletion.pack()
+
+    def waitlist(self, vertex):
+        if vertex in self.vertices_to_delete:
+            self.vertices_to_delete.remove(vertex)
+        else:
+            self.vertices_to_delete.append(vertex)
+
+    def vertex_deletion(self):
+        vertex_indices = []
+        for vertex in self.vertices_to_delete:
+            index = self.Main_Window.vertex_names.index(vertex)
+            vertex_indices.append(index)
+
+        for index in sorted(vertex_indices, reverse=True):
+            self.Main_Window.vertex_names.pop(index)
+            self.Main_Window.vertex_coords.pop(index)
+        
+        self.vertices_to_delete = []
+
+        self.menu_vertex = tb.Menu(self.menubutton_vertex)
+        for vertex in self.Main_Window.vertex_names:
+            self.menu_vertex.add_checkbutton(
+                label=vertex,
+                command= lambda x=vertex: Vertex_List_Frame.waitlist(x)
+            )
+        
+        self.menubutton_vertex['menu'] = self.menu_vertex
