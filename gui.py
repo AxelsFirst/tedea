@@ -170,6 +170,11 @@ class Vertex_Addition_Frame(Sidebar_Frame):
         coords = coords_text.replace(',', '.').split(' ')
         return coords
     
+    def get_str_coords(self):
+        coords_text = self.entry_coords.get()
+        coords = coords_text.replace(',', '.')
+        return coords
+    
     def clear_entries(self):
         self.entry_name.delete(0, len(self.entry_name.get()))
         self.entry_coords.delete(0, len(self.entry_coords.get()))
@@ -177,6 +182,7 @@ class Vertex_Addition_Frame(Sidebar_Frame):
     def vertex_confirmation(self):
         vertex_name = self.entry_name.get()
         unique_name = self.validate_name(vertex_name)
+
         dim_text = self.Sidebar.Dimension_Frame.entry_dimension.get()
         dim_chosen = self.Sidebar.Dimension_Frame.validate_dimension(dim_text)
         
@@ -186,8 +192,10 @@ class Vertex_Addition_Frame(Sidebar_Frame):
 
             Vertex_List_Frame = self.Sidebar.Vertex_List_Frame
 
+            coords_text = self.get_str_coords()
+
             Vertex_List_Frame.menu_vertex.add_checkbutton(
-                label=vertex_name,
+                label=f'{vertex_name}: {coords_text}',
                 command= lambda x=vertex_name: Vertex_List_Frame.waitlist(x)
             )
 
@@ -224,7 +232,9 @@ class Vertex_List_Frame(Sidebar_Frame):
 
     def vertex_deletion(self):
         vertex_indices = []
-        for vertex in self.vertices_to_delete:
+        vertex_names_to_delete = [vertex_name.split(':')[0] for vertex_name in self.vertices_to_delete]
+
+        for vertex in vertex_names_to_delete:
             index = self.Main_Window.vertex_names.index(vertex)
             vertex_indices.append(index)
 
@@ -235,9 +245,17 @@ class Vertex_List_Frame(Sidebar_Frame):
         self.vertices_to_delete = []
 
         self.menu_vertex = tb.Menu(self.menubutton_vertex)
-        for vertex in self.Main_Window.vertex_names:
+        for index in range(len(self.Main_Window.vertex_names)):
+            vertex_name = self.Main_Window.vertex_names[index]
+            vertex_coords = self.Main_Window.vertex_coords[index]
+
+            for i in range(len(vertex_coords)-1):
+                vertex_coords[i] = vertex_coords[i]+' '
+            
+            vertex_coords = ''.join(vertex_coords)
+
             self.menu_vertex.add_checkbutton(
-                label=vertex,
+                label=f'{vertex_name}: {vertex_coords}',
                 command= lambda x=vertex: Vertex_List_Frame.waitlist(x)
             )
         
