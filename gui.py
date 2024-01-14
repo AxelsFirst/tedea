@@ -2,7 +2,7 @@ import ttkbootstrap as tb
 from matplotlib.pyplot import subplots
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from complexes import VietorisRipsComplex
-from metrics import euclidean_metric
+import metrics as m
 from plots import plot_2d_complex
 
 
@@ -11,12 +11,17 @@ class Main_Window(tb.Window):
         tb.Window.__init__(self, themename=themename)
         self.title('Tedea')
 
-        self.dim = None
+        self.language = 'en'
         self.vertex_names = []
         self.vertex_coords = []
         self.metric = 'Euclidean'
         self.metric_dict = {
-            'Euclidean': euclidean_metric
+            'Euclidean': m.euclidean_metric,
+            'Manhattan': m.manhattan_metric,
+            'Maximum': m.maximum_metric,
+            'Euklidesowa': m.euclidean_metric,
+            'Taksówkarza': m.manhattan_metric,
+            'Maksimum': m.maximum_metric
         }
         self.complex = None
         self.betti = None
@@ -54,10 +59,8 @@ class Sidebar(tb.Frame):
         tb.Frame.__init__(self, root, bootstyle=bootstyle)
         self.Main_Window = root
 
-        self.side_label = tb.Label(self, 
-                                   text='Simplicial Complex Settings', 
-                                   bootstyle='inverse-light')
-        self.side_label.pack(pady=20, padx=20)
+        self.Title_Frame = Title_Frame(self)
+        self.Title_Frame.pack()
 
         self.pack_separator()
 
@@ -109,12 +112,116 @@ class Sidebar_Frame(tb.Frame):
         separator.grid(row=row, column=column, columnspan=columnspan, pady=5)
 
 
+class Title_Frame(Sidebar_Frame):
+    def __init__(self, root):
+        Sidebar_Frame.__init__(self, root)
+
+        self.side_label = tb.Label(self, 
+                                   text='Simplicial Complex Settings', 
+                                   bootstyle='inverse-light')
+        self.side_label.config(font=('', 12))
+        self.side_label.pack(pady=15, padx=20)
+
+        self.button_language = tb.Button(self,
+                                         text='[English] Change language',
+                                         bootstyle='info',
+                                         command=self.change_language)
+        self.button_language.pack()
+
+    def change_language(self):
+        Dimension_Frame = self.Sidebar.Dimension_Frame
+        Vertex_Addition_Frame = self.Sidebar.Vertex_Addition_Frame
+        Vertex_List_Frame = self.Sidebar.Vertex_List_Frame
+        Metric_Frame = self.Sidebar.Metric_Frame
+        Plot_Config_Frame = self.Sidebar.Plot_Config_Frame
+        Plot_Generation_Frame = self.Sidebar.Plot_Generation_Frame
+        Plot_Frame = self.Main_Window.Main_Frame.Plot_Frame
+        Betti_Frame = self.Main_Window.Main_Frame.Betti_Frame
+
+        if self.Main_Window.language == 'en':
+            self.Main_Window.language = 'pl'
+            
+            self.side_label.config(text='Ustawienia Kompleksu Symplicjalnego')
+            self.button_language.config(text='[Polski] Zmień język')
+
+            Dimension_Frame.label_dimension.config(text='Podaj wymiar wierzchołków:')
+
+            Vertex_Addition_Frame.label_name.config(text='Podaj etykietę wierzchołka:')
+            Vertex_Addition_Frame.label_coords.config(text='Podaj współrzędne wierzchołka:')
+            Vertex_Addition_Frame.button_confirmation.config(text='Potwierdź wierzchołek')
+
+            Vertex_List_Frame.menubutton_vertex.config(text='Dodane wierzchołki')
+            Vertex_List_Frame.button_deletion.config(text='Usuń wierzchołek')
+
+            Metric_Frame.menu_metric = tb.Menu(Metric_Frame.menubutton_metric)
+
+            self.Main_Window.metric = 'Euklidesowa'
+
+            Metric_Frame.available_metrics = ['Euklidesowa', 'Taksówkarza', 'Maksimum']
+            for metric in Metric_Frame.available_metrics:
+                Metric_Frame.menu_metric.add_radiobutton(
+                    label=metric, 
+                    command= lambda x=metric: Metric_Frame.set_metric(metric=x))
+                
+            Metric_Frame.menubutton_metric['menu'] = Metric_Frame.menu_metric
+
+            Metric_Frame.label_radius.config(text='Podaj promień:')
+
+            Plot_Config_Frame.toggle_graph.config(text='Rysuj graf')
+            Plot_Config_Frame.toggle_balls.config(text='Rysuj kule')
+
+            Plot_Generation_Frame.button_generation.config(text='Wygeneruj wykres')
+            Plot_Generation_Frame.button_save.config(text='Zapisz wykres')
+
+            Plot_Frame.config(text='Wykres')
+
+            Betti_Frame.config(text='Liczby Bettiego')
+        else:
+            self.Main_Window.language = 'en'
+
+            self.side_label.config(text='Simplicial Complex Settings')
+            self.button_language.config(text='[English] Change language')
+
+            Dimension_Frame.label_dimension.config(text='Enter dimension of vertices:')
+
+            Vertex_Addition_Frame.label_name.config(text='Enter vertex label:')
+            Vertex_Addition_Frame.label_coords.config(text='Enter vertex coordinates:')
+            Vertex_Addition_Frame.button_confirmation.config(text='Confirm vertex')
+
+            Vertex_List_Frame.menubutton_vertex.config(text='Added vertices')
+            Vertex_List_Frame.button_deletion.config(text='Delete vertices')
+
+            Metric_Frame.menu_metric = tb.Menu(Metric_Frame.menubutton_metric)
+
+            self.Main_Window.metric = 'Euclidean'
+
+            Metric_Frame.available_metrics = ['Euclidean', 'Manhattan', 'Maximum']
+            for metric in Metric_Frame.available_metrics:
+                Metric_Frame.menu_metric.add_radiobutton(
+                    label=metric, 
+                    command= lambda x=metric: Metric_Frame.set_metric(metric=x))
+                
+            Metric_Frame.menubutton_metric['menu'] = Metric_Frame.menu_metric
+
+            Metric_Frame.label_radius.config(text='Enter radius:')
+
+            Plot_Config_Frame.toggle_graph.config(text='Draw graph')
+            Plot_Config_Frame.toggle_balls.config(text='Draw balls')
+
+            Plot_Generation_Frame.button_generation.config(text='Generate plot')
+            Plot_Generation_Frame.button_save.config(text='Save plot')
+
+            Plot_Frame.config(text='Plot')
+
+            Betti_Frame.config(text='Betti Numbers')
+
+
 class Dimension_Frame(Sidebar_Frame):
     def __init__(self, root):
         Sidebar_Frame.__init__(self, root)
 
-        label_dimension = tb.Label(self, text='Enter dimension of vertices:', bootstyle='inverse-light')
-        label_dimension.pack()
+        self.label_dimension = tb.Label(self, text='Enter dimension of vertices:', bootstyle='inverse-light')
+        self.label_dimension.pack()
 
         validation_dimension = self.Main_Window.register(self.validate_dimension)
 
@@ -234,7 +341,7 @@ class Vertex_List_Frame(Sidebar_Frame):
 
         self.menubutton_vertex = tb.Menubutton(self, 
                                                text='Added vertices', 
-                                               bootstyle='primary')
+                                               bootstyle='secondary')
         self.menubutton_vertex.pack()
 
         self.menu_vertex = tb.Menu(self.menubutton_vertex)
@@ -293,11 +400,12 @@ class Metric_Frame(Sidebar_Frame):
 
         self.menubutton_metric = tb.Menubutton(self, 
                                                text='Choose metric', 
-                                               bootstyle='primary')
+                                               bootstyle='secondary')
         self.menubutton_metric.pack()
 
         self.menu_metric = tb.Menu(self.menubutton_metric)
-        for metric in ['Euclidean', 'Manhattan', 'Maximum']:
+        self.available_metrics =['Euclidean', 'Manhattan', 'Maximum']
+        for metric in self.available_metrics:
             self.menu_metric.add_radiobutton(label=metric, 
                                              command= lambda x=metric: self.set_metric(metric=x))
 
@@ -335,14 +443,14 @@ class Plot_Config_Frame(Sidebar_Frame):
 
         self.Main_Window.draw_graph = tb.BooleanVar()
         self.toggle_graph = tb.Checkbutton(self, 
-                                           bootstyle="outline-toolbutton", 
+                                           bootstyle="secondary-outline-toolbutton", 
                                            text='Draw graph',
                                            variable=self.Main_Window.draw_graph)
         self.toggle_graph.grid(row=0, column=0)
 
         self.Main_Window.draw_balls = tb.BooleanVar()
         self.toggle_balls = tb.Checkbutton(self, 
-                                           bootstyle="outline-toolbutton", 
+                                           bootstyle="secondary-outline-toolbutton", 
                                            text='Draw balls',
                                            variable=self.Main_Window.draw_balls)
         self.toggle_balls.grid(row=0, column=1)
@@ -414,7 +522,7 @@ class Main_Frame(tb.Frame):
         self.Plot_Frame.pack(fill='both', expand=True, pady=5)
 
         self.Betti_Frame = Betti_Frame(self)
-        self.Betti_Frame.pack(fill='both', expand=True, pady=5)
+        self.Betti_Frame.pack(fill='both', expand=True, pady=5, ipady=4)
 
 
 class Plot_Frame(tb.Labelframe):
@@ -431,7 +539,7 @@ class Plot_Frame(tb.Labelframe):
     def update_canvas(self):
         self.Main_Window.ax.clear()
 
-        draw_balls = self.Main_Window.draw_graph.get()
+        draw_balls = self.Main_Window.draw_balls.get()
         draw_simplices=not self.Main_Window.draw_graph.get()
 
         self.Main_Window.fig, self.Main_Window.ax = plot_2d_complex(
@@ -451,20 +559,26 @@ class Plot_Frame(tb.Labelframe):
 
 
 class Betti_Frame(tb.LabelFrame):
-    def __init__(self, root, text='Betti numbers', bootstyle='default'):
+    def __init__(self, root, text='Betti Numbers', bootstyle='default'):
         tb.LabelFrame.__init__(self, root, text=text, bootstyle=bootstyle)
         self.Main_Window = root.Main_Window
 
-        self.betti_label = tb.Label(self, text='')
+        self.betti_label = tb.Label(self, 
+                                    text='\u03B2_0= 1, \u03B2_1= 1, \u03B2_2= 0, \u03B2_3= 0')
+        self.betti_label.config(font=('', 12))
         self.betti_label.pack()
 
     def update_betti(self):
         betti = self.Main_Window.betti
         
         for i in range(len(betti)-1):
-            betti[i] = f'{betti[i]} '
-        betti[-1] = f'{betti[-1]}'
+            betti[i] = f'\u03B2_{i}= {betti[i]}, '
+        betti[-1] = f'\u03B2_{len(betti)-1}= {betti[-1]}'
 
         betti_txt = ''.join(betti)
 
         self.betti_label.config(text=betti_txt)
+
+
+app = Main_Window()
+app.mainloop()
