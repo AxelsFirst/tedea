@@ -1,6 +1,8 @@
 import ttkbootstrap as tb
+from matplotlib.pyplot import subplots
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 from complexes import VietorisRipsComplex
+from metrics import euclidean_metric
 from plots import plot_2d_complex
 
 
@@ -13,15 +15,24 @@ class Main_Window(tb.Window):
         self.vertex_names = []
         self.vertex_coords = []
         self.metric = 'Euclidean'
+        self.metric_dict = {
+            'Euclidean': euclidean_metric
+        }
         self.complex = None
         self.fig = None
+        self.ax = None
         self.betti = None
 
+        self.fig, self.ax = subplots()
+        
         self.Sidebar = Sidebar(self)
         self.Sidebar.pack(side='left', fill='y')
 
-        self.Main_Frame = Main_Frame(self, fig)
+        self.Main_Frame = Main_Frame(self)
         self.Main_Frame.pack(fill='both', expand=True, padx=10, pady=10)
+    
+    def convert_coords_to_float(self):
+        return [[float(coord) for coord in vertex] for vertex in self.vertex_coords]
 
 
 class Sidebar(tb.Frame):
@@ -345,22 +356,25 @@ class Plot_Generation_Frame(Sidebar_Frame):
 
     def generate_plot(self):
         radius = self.Sidebar.Metric_Frame.entry_radius.get()
+        radius_validated = self.Sidebar.Metric_Frame.validate_radius(radius)
 
-        if self.Sidebar.Metric_Frame.validate_radius(radius):
-            self.complex = VietorisRipsComplex(
-                vertices=self.Main_Window.vertex_coords,
+        if radius_validated:
+            vertex_coords = self.Main_Window.convert_coords_to_float()
+
+            metric_func = self.Main_Window.metric_dict[self.Main_Window.metric]
+
+            radius = float(radius)
+
+            self.Main_Window.complex = VietorisRipsComplex(
+                vertices=vertex_coords,
                 vertex_names=self.Main_Window.vertex_names,
                 radius=radius,
-                metric=self.Main_Window.metric)
-            
-            draw_simplices=not self.Sidebar.Plot_Config_Frame.draw_graph.get()
-            self.fig = plot_2d_complex(
-                self.complex,
-                draw_balls=self.Sidebar.Plot_Config_Frame.draw_balls.get(),
-                draw_simplices=draw_simplices
+                metric=metric_func
             )
+            
+            self.Main_Window.Main_Frame.Plot_Frame.update_canvas()
 
-            self.Main_Window.betti = self.complex.get_betti()
+            self.Main_Window.betti = self.Main_Window.complex.get_betti()
     
     def save_plot(self):
         if self.fig == None:
@@ -376,10 +390,11 @@ class Plot_Generation_Frame(Sidebar_Frame):
 
 
 class Main_Frame(tb.Frame):
-    def __init__(self, root, fig, bootstyle='default'):
+    def __init__(self, root, bootstyle='default'):
         tb.Frame.__init__(self, root, bootstyle=bootstyle)
+        self.Main_Window = root
 
-        self.Plot_Frame = Plot_Frame(self, fig)
+        self.Plot_Frame = Plot_Frame(self)
         self.Plot_Frame.pack(fill='both', expand=True, pady=5)
 
         self.Betti_Frame = Betti_Frame(self)
@@ -387,9 +402,33 @@ class Main_Frame(tb.Frame):
 
 
 class Plot_Frame(tb.Labelframe):
-    def __init__(self, root, fig, bootstyle='default'):
+    def __init__(self, root, bootstyle='default'):
         tb.Labelframe.__init__(self, root, text='Plot', bootstyle='default')
+        self.Main_Window = root.Main_Window
+        self.Sidebar = self.Main_Window.Sidebar
         
-        canvas = FigureCanvasTkAgg(fig, self)
-        canvas.draw()
-        canvas.get_tk_widget().pack(side='left', fill='both', expand=True)
+        self.canvas = FigureCanvasTkAgg(self.Main_Window.fig, self)
+        self.canvas.draw()
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(side='left', fill='both', expand=True)
+    
+    def update_canvas(self):
+        self.Main_Window.ax.clear()
+
+        draw_balls = self.Main_Window.draw_graph.get()
+        draw_simplices=not self.Main_Window.draw_graph.get()
+
+        self.Main_Window.fig, self.Main_Window.ax = plot_2d_complex(
+            self.Main_Window.complex,
+            draw_balls=draw_balls,
+            draw_simplices=draw_simplices,
+            return_fig=True,
+            show_plot=False
+        )
+
+        self.canvas_widget.destroy()
+
+        self.canvas = FigureCanvasTkAgg(self.Main_Window.fig, self)
+        self.canvas.draw()
+        self.canvas_widget = self.canvas.get_tk_widget()
+        self.canvas_widget.pack(side='left', fill='both', expand=True)
