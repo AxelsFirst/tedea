@@ -159,9 +159,7 @@ def plot_3d_complex(complex,
                     fig_width=5,
                     fig_height=5,
                     fig_dpi=150,
-                    vertex_size=150,
-                    vertex_interior_color='#fff',
-                    vertex_border_color='#000',
+                    vertex_color='#000',
                     edge_color='#000',
                     save_as_file=False,
                     file_directory='',
@@ -188,12 +186,8 @@ def plot_3d_complex(complex,
                 Height of a matplotlib figure.
     fig_dpi: float, default=150
              DPI of a matplotlib figure.
-    vertex_size: float, default=150
-                 Size of circles representing vertices.
-    vertex_interior_color: str or list of float, default='#fff'
-                           Interior color of circles.
-    vertex_border_color: str or list of float, default='#000'
-                         Border color of circles.
+    vertex_color: str or list of float, default='#000'
+                  Color of vertices.
     edge_color: str or list of float, default='#000'
                 Color of edges of a simplicial complex.
     save_as_file: bool, default=False
@@ -229,36 +223,39 @@ def plot_3d_complex(complex,
     v_x = vertex_coords[:, 0]
     v_y = vertex_coords[:, 1]
     v_z = vertex_coords[:, 2]
-    ax.scatter3D(v_x, v_y, v_z, color='black')
+    ax.scatter3D(v_x, v_y, v_z, color=vertex_color)
 
     edges = np.array(complex.graph.edges)
     for vertex_1, vertex_2 in edges:
         v1_x, v1_y, v1_z = complex.vertices[vertex_1]
         v2_x, v2_y, v2_z = complex.vertices[vertex_2]
-        ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color='black')
+        ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color=edge_color)
 
-    simplices = [simplex for simplex in complex.simplices if len(simplex) > 2]
+    if draw_simplices:
+        simplices = [simplex for simplex in complex.simplices if len(simplex) > 2]
 
-    for dim in range(2, complex.dim+1):
-        p_simplices = [simplex for simplex in simplices if len(simplex) == dim+1]
-        p_simplices_coords = [[complex.vertices[vertex] for vertex in simplex] for simplex in p_simplices]
-
-        if simplex_color is None:
-            color = [random.random() for _ in range(3)]
-        
-        for p_simplex in p_simplices_coords:
-            p_simplex = np.array(p_simplex)
-            s_x = p_simplex[:, 0]
-            s_y = p_simplex[:, 1]
-            s_z = p_simplex[:, 2]
+        for dim in range(2, complex.dim+1):
+            p_simplices = [simplex for simplex in simplices if len(simplex) == dim+1]
+            p_simplices_coords = [[complex.vertices[vertex] for vertex in simplex] for simplex in p_simplices]
 
             if simplex_color is None:
-                ax.plot_trisurf(s_x, s_y, s_z, color=color, alpha=simplex_alpha)
-            elif isinstance(simplex_color, dict):
-                ax.plot_trisurf(s_x, s_y, s_z, color=simplex_color[dim], alpha=simplex_alpha)
-            else:
-                ax.plot_trisurf(s_x, s_y, s_z, color=simplex_color, alpha=simplex_alpha)
+                color = [random.random() for _ in range(3)]
+            
+            for p_simplex in p_simplices_coords:
+                p_simplex = np.array(p_simplex)
+                s_x = p_simplex[:, 0]
+                s_y = p_simplex[:, 1]
+                s_z = p_simplex[:, 2]
 
+                if simplex_color is None:
+                    ax.plot_trisurf(s_x, s_y, s_z, color=color, alpha=simplex_alpha)
+                elif isinstance(simplex_color, dict):
+                    ax.plot_trisurf(s_x, s_y, s_z, color=simplex_color[dim], alpha=simplex_alpha)
+                else:
+                    ax.plot_trisurf(s_x, s_y, s_z, color=simplex_color, alpha=simplex_alpha)
+
+    if save_as_file:
+        plt.savefig(f'{file_directory}{file_name}.{file_extension}')
     if show_plot:
         plt.show()
     if return_fig:
