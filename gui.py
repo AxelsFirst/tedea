@@ -7,7 +7,50 @@ from plots import plot_2d_complex, plot_3d_complex
 
 
 class Main_Window(tb.Window):
+    """
+    Main component of the GUI.
+
+    Parameters
+    ----------
+    themename: str, default='cerculean'
+               Theme provided by ttkbootstrap.
+
+    Attributes
+    ----------
+    language: str, default='en'
+              Currently displayed language.
+    vertex_names: list of str
+                  Labels of vertices.
+    vertex_coords: list of str
+                   Coordinates of vertices stored in string format.
+    metric: str, default='Euclidean'
+            Currently chosen metric stored in string format.
+    metric_dict: dict
+                 Dictionary for translation of metric string into metric function.
+    complex: VietorisRipsComplex
+             Instance of Vietoris-Rips complex.
+    betti: list of int
+           Betti numbers of currently displayed simplicial complex.
+    fig: figure
+         Matplotlib figure for displaying simplicial complex plot.
+    ax: Axis
+        Figure axis for placing generated plot.
+    draw_graph: tb.BooleanVar
+                If True then app generates plot of graph.
+    draw_balls: tb.BooleanVar
+                If True then app draws balls according to the chosen metric.
+    """
+
     def __init__(self, themename='cerculean'):
+        """
+        Initializes the app, packs most important frames and runs startup complex.
+
+        Arguments
+        ---------
+        themename: str, default='cerculean'
+               Theme provided by ttkbootstrap.
+        """
+
         tb.Window.__init__(self, themename=themename)
         self.title('Tedea')
 
@@ -36,6 +79,10 @@ class Main_Window(tb.Window):
         self.Main_Frame.pack(fill='both', expand=True, padx=10, pady=10)
     
     def startup_complex_plot(self):
+        """
+        Runs startup simplicial complex for displaying plot. Betti numbers are pregenerated.
+        """
+
         vertex_names = ["A", "B", "C", "D", "E", "F"]
         vertices = [(0, 0), (1, 0), (0, 1), (2, 1), (1, 2), (0.4, 0.4)]
         radius = 0.75
@@ -51,11 +98,56 @@ class Main_Window(tb.Window):
                                             show_plot=False)
 
     def convert_coords_to_float(self):
+        """
+        Converts vertex_coords from list of str to list of float.
+        """
+
         return [[float(coord) for coord in vertex] for vertex in self.vertex_coords]
 
 
 class Sidebar(tb.Frame):
+    """
+    Sidebar used to place Frames used for customizing simplicial complex.
+
+    Parameters
+    ----------
+    root: Main_Window
+          Root upon this Sidebar is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Root upon this Sidebar is packed.
+    Title_Frame: Title_Frame
+                 Frame for title and language customization.
+    Dimension_Frame: Dimension_Frame
+                     Frame for choosing dimension of vertices.
+    Vertex_Addition_Frame: Vertex_Addition_Frame
+                           Frame for adding new vertices.
+    Vertex_List_Frame: Vertex_List_Frame
+                       Frame for checking and deleting vertices.
+    Metric_Frame: Metric_Frame
+                  Frame for choosing metric and radius.
+    Plot_Config_Frame: Plot_Config_Frame
+                       Frame for configuring plots.
+    Plot_Generation_Frame: Plot_Generation_Frame
+                           Frame for plot generation.
+    """
+
     def __init__(self, root, bootstyle='light'):
+        """
+        Initializes all frames packed inside Sidebar.
+
+        Parameters
+        ----------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         tb.Frame.__init__(self, root, bootstyle=bootstyle)
         self.Main_Window = root
 
@@ -93,27 +185,94 @@ class Sidebar(tb.Frame):
         self.Plot_Generation_Frame.pack()
 
     def pack_separator(self):
+        """
+        Packs visible separator with primary style.
+        """
+
         separator = tb.Separator(self, bootstyle='primary')
         separator.pack(fill='x', padx=15, pady=25)
 
 
 class Sidebar_Frame(tb.Frame):
+    """
+    Template for other frames placed in Sidebar.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    """
+
     def __init__(self, root, bootstyle='light'):
+        """
+        Initializes the frame and sets the style.
+        """
+
         tb.Frame.__init__(self, root, bootstyle=bootstyle)
         self.Main_Window = root.Main_Window
         self.Sidebar = root
     
     def pack_hidden_separator(self, bootstyle='light'):
+        """
+        Packs hidden separator for spacing.
+        """
+
         separator = tb.Separator(self, bootstyle=bootstyle)
         separator.pack(pady=5)
     
     def grid_hidden_separator(self, row, column, columnspan, bootstyle='light'):
+        """
+        Grids hidden separator for spacing.
+        """
+
         separator = tb.Separator(self, bootstyle=bootstyle)
         separator.grid(row=row, column=column, columnspan=columnspan, pady=5)
 
 
 class Title_Frame(Sidebar_Frame):
+    """
+    Frame for title and language customization.
+    
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    side_label: tb.Label
+                Title label.
+    self.button_language: tb.Button
+                          Button for changing the displayed language.
+    """
+
     def __init__(self, root):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         Sidebar_Frame.__init__(self, root)
 
         self.side_label = tb.Label(self, 
@@ -129,6 +288,10 @@ class Title_Frame(Sidebar_Frame):
         self.button_language.pack()
 
     def change_language(self):
+        """
+        Changes the displayed language by swapping all visible texts.
+        """
+
         Dimension_Frame = self.Sidebar.Dimension_Frame
         Vertex_Addition_Frame = self.Sidebar.Vertex_Addition_Frame
         Vertex_List_Frame = self.Sidebar.Vertex_List_Frame
@@ -225,7 +388,40 @@ class Title_Frame(Sidebar_Frame):
 
 
 class Dimension_Frame(Sidebar_Frame):
+    """
+    Frame for choosing dimension of vertices.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    label_dimension: tb.Label
+                     Label for entry_dimension.
+    entry_dimension: tb.Entry
+                     Entry for getting dimension of vertices.
+    """
+
     def __init__(self, root):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         Sidebar_Frame.__init__(self, root)
 
         self.label_dimension = tb.Label(self, text='Enter dimension of vertices:', bootstyle='inverse-light')
@@ -237,6 +433,20 @@ class Dimension_Frame(Sidebar_Frame):
         self.entry_dimension.pack()
     
     def validate_dimension(self, dim):
+        """
+        Validates entry_dimension output by checking characters. Autodisables uncompatible options.
+
+        Arguments
+        ---------
+        dim: str
+             Output from entry_dimension.
+
+        Returns
+        -------
+        validated: bool
+                   True if dim is an integer.
+        """
+
         if dim.isdecimal():
             if int(dim) == 2:
                 self.Sidebar.Plot_Config_Frame.toggle_graph.config(state='normal')
@@ -276,7 +486,47 @@ class Dimension_Frame(Sidebar_Frame):
 
 
 class Vertex_Addition_Frame(Sidebar_Frame):
+    """
+    Frame for adding new vertices.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    label_name: tb.Label
+                Label for entry_name.
+    entry_name: tb.Entry
+                Entry for getting vertex name.
+    label_coords: tb.Label
+                  Label for entry_coords.
+    entry_coords: tb.Entry
+                  Entry for getting coords spaced out by one space.
+    button_confirmation: tb.Button
+                         Confirmation of addition of new vertex. 
+                         Clears out entries upon being pressed.
+    """
+
     def __init__(self, root):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         Sidebar_Frame.__init__(self, root)
 
         self.label_name = tb.Label(self, 
@@ -314,12 +564,40 @@ class Vertex_Addition_Frame(Sidebar_Frame):
         self.button_confirmation.pack(pady=10)
 
     def validate_name(self, name):
+        """
+        Validates name by checking its uniqueness.
+
+        Arguments
+        ---------
+        name: str
+              Name of vertex.
+
+        Returns
+        -------
+        validated: bool
+                   True if name is unique.
+        """
+
         if name in self.Main_Window.vertex_names:
             return False
         else:
             return True
 
     def validate_coords(self, coords_text):
+        """
+        Validates coordinates by checking their type, their amount and uniqueness.
+
+        Arguments
+        ---------
+        coords_text: str
+                     Coordinates stored in one string.
+
+        Returns
+        -------
+        validated: bool
+                   True if correct type, amount and if is unique.
+        """
+
         coords = coords_text.replace(',', '').split(' ')
         dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
         
@@ -338,20 +616,46 @@ class Vertex_Addition_Frame(Sidebar_Frame):
         return True
     
     def get_coords(self):
+        """
+        Get coordinates from entry as a list of str.
+
+        Returns
+        -------
+        coords: list of str
+                Coordinates from entry.
+        """
+
         coords_text = self.entry_coords.get()
         coords = coords_text.replace(',', '.').split(' ')
         return coords
     
     def get_str_coords(self):
+        """
+        Get coordinates from entry as a single string.
+
+        Returns
+        -------
+        coords: str
+                Coordinates from entry.
+        """
+
         coords_text = self.entry_coords.get()
         coords = coords_text.replace(',', '.')
         return coords
     
     def clear_entries(self):
+        """
+        Clears entry_name and entry_coords.
+        """
+
         self.entry_name.delete(0, len(self.entry_name.get()))
         self.entry_coords.delete(0, len(self.entry_coords.get()))
 
     def vertex_confirmation(self):
+        """
+        Last check and addition of new vertex to the list of vertices.
+        """
+
         vertex_name = self.entry_name.get()
         unique_name = self.validate_name(vertex_name)
 
@@ -375,7 +679,45 @@ class Vertex_Addition_Frame(Sidebar_Frame):
 
 
 class Vertex_List_Frame(Sidebar_Frame):
+    """
+    Frame for checking and deleting vertices.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    vertices_to_delete: list of str
+                        List of vertices to delete.
+    menubutton_vertex: tb.Menubutton
+                       Button for showing menu_vertex.
+    menu_vertex: tb.Menu
+                 List of previously added vertices. 
+                 Check vertices to flag them for deletion.
+    button_deletion: tb.Button
+                     Button for deletion of all flagged vertices.
+    """
+
     def __init__(self, root):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         Sidebar_Frame.__init__(self, root)
         self.vertices_to_delete = []
 
@@ -386,7 +728,7 @@ class Vertex_List_Frame(Sidebar_Frame):
 
         self.menu_vertex = tb.Menu(self.menubutton_vertex)
 
-        self.menubutton_vertex['menu'] = self.menu_vertex # create a function to refresh it every new vertex
+        self.menubutton_vertex['menu'] = self.menu_vertex
 
         self.pack_hidden_separator()
 
@@ -397,12 +739,20 @@ class Vertex_List_Frame(Sidebar_Frame):
         self.button_deletion.pack()
 
     def waitlist(self, vertex):
+        """
+        Flags or unflags vertices for deletion.        
+        """
+
         if vertex in self.vertices_to_delete:
             self.vertices_to_delete.remove(vertex)
         else:
             self.vertices_to_delete.append(vertex)
 
     def vertex_deletion(self):
+        """
+        Deletes flagged vertices and create new list of remaining vertices.
+        """
+
         vertex_indices = []
         vertex_names_to_delete = [vertex_name.split(':')[0] for vertex_name in self.vertices_to_delete]
 
@@ -435,6 +785,34 @@ class Vertex_List_Frame(Sidebar_Frame):
 
 
 class Metric_Frame(Sidebar_Frame):
+    """
+    Frame for choosing metric and radius.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    menubutton_metric: tb.Menubutton
+                       Button for showing menu_metric.
+    menu_metric: tb.Menu
+                 Menu displaying available metrics.
+    available_metrics: list of str
+                       List of available metrics.
+    label_radius: tb.Label
+                  Label for entry_radius.
+    entry_radius: tb.Entry
+                  Entry for getting radius.
+    """
+
     def __init__(self, root):
         Sidebar_Frame.__init__(self, root)
 
@@ -444,7 +822,7 @@ class Metric_Frame(Sidebar_Frame):
         self.menubutton_metric.pack()
 
         self.menu_metric = tb.Menu(self.menubutton_metric)
-        self.available_metrics =['Euclidean', 'Manhattan', 'Maximum']
+        self.available_metrics = ['Euclidean', 'Manhattan', 'Maximum']
         for metric in self.available_metrics:
             self.menu_metric.add_radiobutton(label=metric, 
                                              command= lambda x=metric: self.set_metric(metric=x))
@@ -466,10 +844,34 @@ class Metric_Frame(Sidebar_Frame):
         self.entry_radius.pack()
 
     def set_metric(self, metric):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         self.menubutton_metric.config(text=metric)
         self.Main_Window.metric = metric
 
     def validate_radius(self, radius):
+        """
+        Validates radius by checking their value.
+
+        Arguments
+        ---------
+        radius: str
+                Radius stored in string.
+
+        Returns
+        -------
+        validated: bool
+                   True if correct type.
+        """
         radius = radius.replace(',', '').replace('.', '')
         if radius.isdecimal():
             return True
@@ -478,7 +880,37 @@ class Metric_Frame(Sidebar_Frame):
         
 
 class Plot_Config_Frame(Sidebar_Frame):
+    """
+    Frame for configuring plots.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+
+    """
+
     def __init__(self, root):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         Sidebar_Frame.__init__(self, root)
 
         self.Main_Window.draw_graph = tb.BooleanVar()
@@ -497,7 +929,44 @@ class Plot_Config_Frame(Sidebar_Frame):
 
 
 class Plot_Generation_Frame(Sidebar_Frame):
+    """
+    Frame for plot generation.
+
+    Parameters
+    ----------
+    root: Sidebar
+          Root upon this frame is packed.
+    bootstyle: str, default='light'
+               Style of widget.
+    
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Main window of the app.
+    Sidebar: Sidebar
+             Sidebar this frame is packed upon.
+    plot_generation: register(function)
+                     Function for plot generation.
+    button_generation: tb.Button
+                       Button for starting the plot generation process.
+    plot_saving: register(function)
+                 Function for saving generated plot.
+    button_save: tb.Button
+                 Button for starting the plot saving process.
+    """
+
     def __init__(self, root):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='light'
+                Style of widget.
+        """
+
         Sidebar_Frame.__init__(self, root)
 
         self.plot_generation = self.Main_Window.register(self.generate_plot)
@@ -517,6 +986,15 @@ class Plot_Generation_Frame(Sidebar_Frame):
         self.grid_hidden_separator(row=1, column=1, columnspan=2)
     
     def check_input(self):
+        """
+        Checks if all input from entries is correct.
+
+        Returns
+        -------
+        validated: bool
+                   If True then data is correct.
+        """
+
         dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
         dim_validated = self.Sidebar.Dimension_Frame.validate_dimension(dim)
 
@@ -532,6 +1010,10 @@ class Plot_Generation_Frame(Sidebar_Frame):
 
 
     def generate_plot(self):
+        """
+        Generates the plot and starts the process of updating plot canvas and Betti label.
+        """
+
         radius = self.Sidebar.Metric_Frame.entry_radius.get()
 
         if self.check_input():
@@ -555,6 +1037,10 @@ class Plot_Generation_Frame(Sidebar_Frame):
             self.Main_Window.Main_Frame.Betti_Frame.update_betti()
     
     def save_plot(self):
+        """
+        Saves plot to app directory.
+        """
+
         if self.check_input():
             dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
 
@@ -584,7 +1070,38 @@ class Plot_Generation_Frame(Sidebar_Frame):
 
 
 class Main_Frame(tb.Frame):
+    """
+    Frame used to place other Frames displaying app output.
+
+    Parameters
+    ----------
+    root: Main_Window
+          Root upon this Sidebar is packed.
+    bootstyle: str, default='default'
+               Style of widget.
+
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Root upon this Main_Frame is packed.
+    Plot_Frame: Plot_Frame
+                Frame for packing plot canvas.
+    Betti_Frame: Betti_Frame
+                 Frame for displaying Betti numbers.
+    """
+
     def __init__(self, root, bootstyle='default'):
+        """
+        Initializes all frames packed inside Main_Frame.
+
+        Parameters
+        ----------
+        root: Main_Window
+            Root upon this Sidebar is packed.
+        bootstyle: str, default='default'
+                Style of widget.
+        """
+
         tb.Frame.__init__(self, root, bootstyle=bootstyle)
         self.Main_Window = root
 
@@ -596,7 +1113,37 @@ class Main_Frame(tb.Frame):
 
 
 class Plot_Frame(tb.Labelframe):
+    """
+    Frame for packing plot canvas.
+
+    Parameters
+    ----------
+    root: Main_Frame
+          Root upon this frame is packed.
+    bootstyle: str, default='default'
+               Style of widget.
+
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Root upon this Main_Frame is packed.
+    Sidebar: Sidebar
+             Sidebar for getting data.
+    canvas: FigureCanvasTkAgg
+            Matplotlib plot embedded into app.
+    """
+
     def __init__(self, root, bootstyle='default'):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Frame
+              Root upon this frame is packed.
+        bootstyle: str, default='default'
+                   Style of widget.
+        """
         tb.Labelframe.__init__(self, root, text='Plot', bootstyle='default')
         self.Main_Window = root.Main_Window
         self.Sidebar = self.Main_Window.Sidebar
@@ -607,6 +1154,10 @@ class Plot_Frame(tb.Labelframe):
         self.canvas_widget.pack(side='left', fill='both', expand=True)
     
     def update_canvas(self):
+        """
+        Updates the canvas by deleting it and packing a new canvas.
+        """
+
         self.Main_Window.ax.clear()
 
         dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
@@ -662,7 +1213,36 @@ class Plot_Frame(tb.Labelframe):
 
 
 class Betti_Frame(tb.LabelFrame):
+    """
+    Frame for displaying Betti numbers.
+
+    Parameters
+    ----------
+    root: Main_Frame
+          Root upon this frame is packed.
+    bootstyle: str, default='default'
+               Style of widget.
+
+    Attributes
+    ----------
+    Main_Window: Main_Window
+                 Root upon this Main_Frame is packed.
+    betti_label: tb.Label
+                 Displays Betti numbers of plotted simplicial complex.
+    """
+
     def __init__(self, root, text='Betti Numbers', bootstyle='default'):
+        """
+        Initializes all widgets packed inside.
+
+        Arguments
+        ---------
+        root: Main_Frame
+              Root upon this frame is packed.
+        bootstyle: str, default='default'
+                   Style of widget.
+        """
+
         tb.LabelFrame.__init__(self, root, text=text, bootstyle=bootstyle)
         self.Main_Window = root.Main_Window
 
@@ -672,6 +1252,10 @@ class Betti_Frame(tb.LabelFrame):
         self.betti_label.pack()
 
     def update_betti(self):
+        """
+        Updates betti_label.
+        """
+
         betti = self.Main_Window.betti
         
         for i in range(len(betti)-1):
@@ -683,5 +1267,6 @@ class Betti_Frame(tb.LabelFrame):
         self.betti_label.config(text=betti_txt)
 
 
-app = Main_Window()
-app.mainloop()
+if __name__ == '__main__':
+    app = Main_Window()
+    app.mainloop()
