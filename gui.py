@@ -171,6 +171,10 @@ class Title_Frame(Sidebar_Frame):
             Plot_Config_Frame.toggle_balls.config(text='Rysuj kule')
 
             Plot_Generation_Frame.button_generation.config(text='Wygeneruj wykres')
+            if Dimension_Frame.entry_dimension.get().isdecimal():
+                dim = int(Dimension_Frame.entry_dimension.get())
+                if dim != 2 and dim != 3:
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Oblicz liczby Bettiego')
             Plot_Generation_Frame.button_save.config(text='Zapisz wykres')
 
             Plot_Frame.config(text='Wykres')
@@ -209,6 +213,10 @@ class Title_Frame(Sidebar_Frame):
             Plot_Config_Frame.toggle_balls.config(text='Draw balls')
 
             Plot_Generation_Frame.button_generation.config(text='Generate plot')
+            if Dimension_Frame.entry_dimension.get().isdecimal():
+                dim = int(Dimension_Frame.entry_dimension.get())
+                if dim != 2 and dim != 3:
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Calculate Betti numbers')
             Plot_Generation_Frame.button_save.config(text='Save plot')
 
             Plot_Frame.config(text='Plot')
@@ -230,7 +238,39 @@ class Dimension_Frame(Sidebar_Frame):
     
     def validate_dimension(self, dim):
         if dim.isdecimal():
-            return True
+            if int(dim) == 2:
+                self.Sidebar.Plot_Config_Frame.toggle_graph.config(state='normal')
+                self.Sidebar.Plot_Config_Frame.toggle_balls.config(state='normal')
+
+                self.Sidebar.Plot_Generation_Frame.button_save.config(state='normal')
+                if self.Main_Window.language == 'en':
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Generate plot')
+                else:
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Wygeneruj wykres')
+
+                return True
+            elif int(dim) == 3:
+                self.Sidebar.Plot_Config_Frame.toggle_graph.config(state='normal')
+                self.Sidebar.Plot_Config_Frame.toggle_balls.config(state='disabled')
+
+                self.Sidebar.Plot_Generation_Frame.button_save.config(state='normal')
+                if self.Main_Window.language == 'en':
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Generate plot')
+                else:
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Wygeneruj wykres')
+
+                return True
+            else:
+                self.Sidebar.Plot_Config_Frame.toggle_graph.config(state='disabled')
+                self.Sidebar.Plot_Config_Frame.toggle_balls.config(state='disabled')
+
+                self.Sidebar.Plot_Generation_Frame.button_save.config(state='disabled')
+                if self.Main_Window.language == 'en':
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Calculate Betti numbers')
+                else:
+                    self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Oblicz liczby Bettiego')
+                
+                return True
         else:
             return False
 
@@ -475,12 +515,26 @@ class Plot_Generation_Frame(Sidebar_Frame):
         self.button_save.grid(row=0, column=1)
 
         self.grid_hidden_separator(row=1, column=1, columnspan=2)
+    
+    def check_input(self):
+        dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
+        dim_validated = self.Sidebar.Dimension_Frame.validate_dimension(dim)
 
-    def generate_plot(self):
+        added_vertices = len(self.Main_Window.vertex_names) > 0
+
         radius = self.Sidebar.Metric_Frame.entry_radius.get()
         radius_validated = self.Sidebar.Metric_Frame.validate_radius(radius)
 
-        if radius_validated:
+        if dim_validated and added_vertices and radius_validated:
+            return True
+        else:
+            False
+
+
+    def generate_plot(self):
+        radius = self.Sidebar.Metric_Frame.entry_radius.get()
+
+        if self.check_input():
             vertex_coords = self.Main_Window.convert_coords_to_float()
 
             metric_func = self.Main_Window.metric_dict[self.Main_Window.metric]
@@ -501,16 +555,32 @@ class Plot_Generation_Frame(Sidebar_Frame):
             self.Main_Window.Main_Frame.Betti_Frame.update_betti()
     
     def save_plot(self):
-        if self.fig == None:
-            self.generate_plot()
-        else:
-            draw_simplices=not self.Sidebar.Plot_Config_Frame.draw_graph.get()
-            plot_2d_complex(
-                self.complex,
-                save_as_file=True,
-                draw_balls=self.Sidebar.Plot_Config_Frame.draw_balls.get(),
-                draw_simplices=draw_simplices
-            )
+        if self.check_input():
+            dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
+
+            if int(dim) == 2:
+                draw_balls = self.Main_Window.draw_balls.get()
+                draw_simplices = not self.Main_Window.draw_graph.get()
+
+                plot_2d_complex(
+                    self.Main_Window.complex,
+                    draw_balls=draw_balls,
+                    draw_simplices=draw_simplices,
+                    save_as_file=True,
+                    return_fig=False,
+                    show_plot=False
+                )
+
+            elif int(dim) == 3:
+                draw_simplices = not self.Main_Window.draw_graph.get()
+
+                self.Main_Window.fig, self.Main_Window.ax = plot_3d_complex(
+                    self.Main_Window.complex,
+                    draw_simplices=draw_simplices,
+                    save_as_file=True,
+                    return_fig=True,
+                    show_plot=False
+                )
 
 
 class Main_Frame(tb.Frame):
@@ -543,7 +613,7 @@ class Plot_Frame(tb.Labelframe):
 
         if int(dim) == 2:
             draw_balls = self.Main_Window.draw_balls.get()
-            draw_simplices=not self.Main_Window.draw_graph.get()
+            draw_simplices = not self.Main_Window.draw_graph.get()
 
             self.Main_Window.fig, self.Main_Window.ax = plot_2d_complex(
                 self.Main_Window.complex,
@@ -561,7 +631,7 @@ class Plot_Frame(tb.Labelframe):
             self.canvas_widget.pack(side='left', fill='both', expand=True)
 
         elif int(dim) == 3:
-            draw_simplices=not self.Main_Window.draw_graph.get()
+            draw_simplices = not self.Main_Window.draw_graph.get()
 
             self.Main_Window.fig, self.Main_Window.ax = plot_3d_complex(
                 self.Main_Window.complex,
