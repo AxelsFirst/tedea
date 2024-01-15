@@ -615,10 +615,13 @@ class Plot_Frame(tb.Labelframe):
             draw_balls = self.Main_Window.draw_balls.get()
             draw_simplices = not self.Main_Window.draw_graph.get()
 
+            metric = self.Main_Window.metric_dict[self.Main_Window.metric]
+
             self.Main_Window.fig, self.Main_Window.ax = plot_2d_complex(
                 self.Main_Window.complex,
                 draw_balls=draw_balls,
                 draw_simplices=draw_simplices,
+                metric=metric,
                 return_fig=True,
                 show_plot=False
             )
