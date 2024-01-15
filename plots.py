@@ -219,6 +219,8 @@ def plot_3d_complex(complex,
     fig.set_dpi(fig_dpi)
     ax.axis('equal')
 
+    vertex_coords = list(complex.vertices.values())
+
     vertex_coords = np.array(vertex_coords)
     v_x = vertex_coords[:, 0]
     v_y = vertex_coords[:, 1]
@@ -230,6 +232,10 @@ def plot_3d_complex(complex,
         v1_x, v1_y, v1_z = complex.vertices[vertex_1]
         v2_x, v2_y, v2_z = complex.vertices[vertex_2]
         ax.plot([v1_x, v2_x], [v1_y, v2_y], [v1_z, v2_z], color=edge_color)
+    
+    ax.set_xlim((min(v_x)-0.1, max(v_x)+0.1))
+    ax.set_ylim((min(v_y)-0.1, max(v_y)+0.1))
+    ax.set_zlim((min(v_z)-0.1, max(v_z)+0.1))
 
     if draw_simplices:
         simplices = [simplex for simplex in complex.simplices if len(simplex) > 2]
