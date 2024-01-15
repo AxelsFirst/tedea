@@ -74,7 +74,7 @@ class VietorisRipsComplex:
         graph = nx.Graph()
         graph.add_nodes_from(self.vertex_names)
         for i, j in combinations(self.vertex_names, 2):
-            if self.metric(self.vertices[i], self.vertices[j]) <= 2*self.radius:
+            if self.metric(self.vertices[i], self.vertices[j]) < 2*self.radius:
                 graph.add_edge(i, j)
         return graph
 
