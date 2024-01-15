@@ -1,10 +1,10 @@
 import matplotlib.pyplot as plt
-from matplotlib.patches import Circle, Polygon
+from matplotlib.patches import Circle, Rectangle, Polygon
 from matplotlib.collections import PatchCollection
-from mpl_toolkits.mplot3d.art3d import Poly3DCollection
 import networkx as nx
 import random
 import numpy as np
+from metrics import *
 
 def plot_2d_complex(complex,
                     fig=None,
@@ -24,6 +24,7 @@ def plot_2d_complex(complex,
                     file_name='plot_of_complex',
                     file_extension='png',
                     draw_balls=False,
+                    metric=euclidean_metric,
                     ball_alpha=0.2,
                     ball_color=None,
                     draw_simplices=True,
@@ -70,6 +71,8 @@ def plot_2d_complex(complex,
                     refer to matplotlib documentation.
     draw_balls: bool, default=False
                 If True then draws balls of radius of a simplicial complex.
+    metric: function, default=euclidean_metric
+            Metric used to measure distance from center of balls.
     ball_alpha: float, default=0.2
                 Value corresponding to transparency of balls.
     ball_color: None or float, default=None
@@ -103,21 +106,60 @@ def plot_2d_complex(complex,
             edgecolors=edge_color)
     
     if draw_balls:
-        for vertex in complex.vertices.values():
-            if ball_color is None:
-                color = [random.random() for _ in range(3)]
-            else:
-                color = ball_color
+        if metric == euclidean_metric:
+            for vertex in complex.vertices.values():
+                if ball_color is None:
+                    color = [random.random() for _ in range(3)]
+                else:
+                    color = ball_color
 
-            ball = Circle(vertex,
-                            radius=complex.radius,
-                            alpha=ball_alpha,
-                            edgecolor=None,
-                            facecolor=color,
-                            zorder=-1)
+                ball = Circle(vertex,
+                              radius=complex.radius,
+                              alpha=ball_alpha,
+                              edgecolor=None,
+                              facecolor=color,
+                              zorder=-1)
 
-            ax.add_artist(ball)
-            
+                ax.add_artist(ball)
+
+        if metric == manhattan_metric:
+            for vertex in complex.vertices.values():
+                if ball_color is None:
+                    color = [random.random() for _ in range(3)]
+                else:
+                    color = ball_color
+
+                ball_anchor = np.array(vertex) - np.array([0, complex.radius])
+                edge_length = euclidean_metric([-complex.radius,0], [0,-complex.radius])
+                ball = Rectangle(ball_anchor, 
+                                 edge_length, 
+                                 edge_length,
+                                 angle=45,
+                                 alpha=ball_alpha,
+                                 edgecolor=None,
+                                 facecolor=color,
+                                 zorder=-1)
+
+                ax.add_artist(ball)
+
+        if metric == maximum_metric:
+            for vertex in complex.vertices.values():
+                if ball_color is None:
+                    color = [random.random() for _ in range(3)]
+                else:
+                    color = ball_color
+
+                ball_anchor = np.array(vertex) - np.array([complex.radius, complex.radius])
+                ball = Rectangle(ball_anchor, 
+                                 2*complex.radius, 
+                                 2*complex.radius,
+                                 alpha=ball_alpha,
+                                 edgecolor=None,
+                                 facecolor=color,
+                                 zorder=-1)
+
+                ax.add_artist(ball)
+    
     if draw_simplices:
         simplices = [simplex for simplex in complex.get_all_simplices() if len(simplex) > 2]
 
