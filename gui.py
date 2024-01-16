@@ -669,10 +669,11 @@ class Vertex_Addition_Frame(Sidebar_Frame):
             Vertex_List_Frame = self.Sidebar.Vertex_List_Frame
 
             coords_text = self.get_str_coords()
+            text = f'{vertex_name}: {coords_text}'
 
-            Vertex_List_Frame.menu_vertex.add_checkbutton(
-                label=f'{vertex_name}: {coords_text}',
-                command= lambda x=vertex_name: Vertex_List_Frame.waitlist(x)
+            Vertex_List_Frame.menu_vertex.add_radiobutton(
+                label=text,
+                command= lambda x=text: Vertex_List_Frame.waitlist(x)
             )
 
             self.clear_entries()
@@ -695,8 +696,8 @@ class Vertex_List_Frame(Sidebar_Frame):
                  Main window of the app.
     Sidebar: Sidebar
              Sidebar this frame is packed upon.
-    vertices_to_delete: list of str
-                        List of vertices to delete.
+    vertex_to_delete: list of str
+                      List of vertices to delete.
     menubutton_vertex: tb.Menubutton
                        Button for showing menu_vertex.
     menu_vertex: tb.Menu
@@ -719,7 +720,7 @@ class Vertex_List_Frame(Sidebar_Frame):
         """
 
         Sidebar_Frame.__init__(self, root)
-        self.vertices_to_delete = []
+        self.vertex_to_delete = ''
 
         self.menubutton_vertex = tb.Menubutton(self, 
                                                text='Added vertices', 
@@ -743,45 +744,44 @@ class Vertex_List_Frame(Sidebar_Frame):
         Flags or unflags vertices for deletion.        
         """
 
-        if vertex in self.vertices_to_delete:
-            self.vertices_to_delete.remove(vertex)
-        else:
-            self.vertices_to_delete.append(vertex)
+        temp_vertex = vertex
+        self.vertex_to_delete = temp_vertex
 
     def vertex_deletion(self):
         """
         Deletes flagged vertices and create new list of remaining vertices.
         """
 
-        vertex_indices = []
-        vertex_names_to_delete = [vertex_name.split(':')[0] for vertex_name in self.vertices_to_delete]
+        vertex_txt = self.vertex_to_delete
 
-        for vertex in vertex_names_to_delete:
-            index = self.Main_Window.vertex_names.index(vertex)
-            vertex_indices.append(index)
+        if vertex_txt != '':
+            vertex_name = vertex_txt.split(':')[0]
+            vertex_index = self.Main_Window.vertex_names.index(vertex_name)
 
-        for index in sorted(vertex_indices, reverse=True):
-            self.Main_Window.vertex_names.pop(index)
-            self.Main_Window.vertex_coords.pop(index)
-        
-        self.vertices_to_delete = []
+            self.Main_Window.vertex_names.pop(vertex_index)
+            self.Main_Window.vertex_coords.pop(vertex_index)
 
-        self.menu_vertex = tb.Menu(self.menubutton_vertex)
-        for index in range(len(self.Main_Window.vertex_names)):
-            vertex_name = self.Main_Window.vertex_names[index]
-            vertex_coords = self.Main_Window.vertex_coords[index]
+            self.vertex_to_delete = ''
 
-            for i in range(len(vertex_coords)-1):
-                vertex_coords[i] = vertex_coords[i]+' '
-            
-            vertex_coords = ''.join(vertex_coords)
+            self.menu_vertex = tb.Menu(self.menubutton_vertex)
 
-            self.menu_vertex.add_checkbutton(
-                label=f'{vertex_name}: {vertex_coords}',
-                command= lambda x=vertex: Vertex_List_Frame.waitlist(x)
-            )
-        
-        self.menubutton_vertex['menu'] = self.menu_vertex
+            for index in range(len(self.Main_Window.vertex_names)):
+                remaining_vertex_name = self.Main_Window.vertex_names[index]
+                remaining_vertex_coords = self.Main_Window.vertex_coords[index]
+
+                remaining_vertex_coords_txt = ''
+                for coord_index in range(len(remaining_vertex_coords)-1):
+                    remaining_vertex_coords_txt += remaining_vertex_coords[coord_index]+' '
+                remaining_vertex_coords_txt += remaining_vertex_coords[-1]
+
+                text = f'{remaining_vertex_name}: {remaining_vertex_coords_txt}'
+
+                self.menu_vertex.add_radiobutton(
+                    label=text,
+                    command= lambda x=text: self.waitlist(x)
+                )
+
+            self.menubutton_vertex['menu'] = self.menu_vertex
 
 
 class Metric_Frame(Sidebar_Frame):
