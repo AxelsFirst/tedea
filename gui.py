@@ -319,7 +319,7 @@ class Title_Frame(Sidebar_Frame):
             Metric_Frame.menu_metric = tb.Menu(Metric_Frame.menubutton_metric)
 
             self.Main_Window.metric = 'Euklidesowa'
-
+            Metric_Frame.menubutton_metric.config(text='Wybierz metrykę')
             Metric_Frame.available_metrics = ['Euklidesowa', 'Taksówkarza', 'Maksimum']
             for metric in Metric_Frame.available_metrics:
                 Metric_Frame.menu_metric.add_radiobutton(
@@ -361,7 +361,7 @@ class Title_Frame(Sidebar_Frame):
             Metric_Frame.menu_metric = tb.Menu(Metric_Frame.menubutton_metric)
 
             self.Main_Window.metric = 'Euclidean'
-
+            Metric_Frame.menubutton_metric.config(text='Choose metric')
             Metric_Frame.available_metrics = ['Euclidean', 'Manhattan', 'Maximum']
             for metric in Metric_Frame.available_metrics:
                 Metric_Frame.menu_metric.add_radiobutton(
@@ -480,7 +480,10 @@ class Dimension_Frame(Sidebar_Frame):
                 else:
                     self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Oblicz liczby Bettiego')
                 
-                return True
+                if int(dim) == 0:
+                    return False
+                else:
+                    return True
         else:
             return False
 
@@ -661,8 +664,11 @@ class Vertex_Addition_Frame(Sidebar_Frame):
 
         dim_text = self.Sidebar.Dimension_Frame.entry_dimension.get()
         dim_chosen = self.Sidebar.Dimension_Frame.validate_dimension(dim_text)
+
+        coords_txt = self.get_str_coords()
+        coords_validated = self.validate_coords(coords_txt)
         
-        if unique_name and dim_chosen:
+        if unique_name and dim_chosen and coords_validated:
             self.Main_Window.vertex_names.append(vertex_name)
             self.Main_Window.vertex_coords.append(self.get_coords())
 
