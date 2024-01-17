@@ -39,6 +39,10 @@ class Main_Window(tb.Window):
                 If True then app generates plot of graph.
     draw_balls: tb.BooleanVar
                 If True then app draws balls according to the chosen metric.
+    Sidebar: Sidebar
+             Sidebar used to place Frames used for customizing simplicial complex.
+    Main_Frame: Main_Frame
+                Frame used to place other Frames displaying app output.
     """
 
     def __init__(self, themename='cerculean'):
@@ -319,7 +323,7 @@ class Title_Frame(Sidebar_Frame):
             Metric_Frame.menu_metric = tb.Menu(Metric_Frame.menubutton_metric)
 
             self.Main_Window.metric = 'Euklidesowa'
-
+            Metric_Frame.menubutton_metric.config(text='Wybierz metrykę')
             Metric_Frame.available_metrics = ['Euklidesowa', 'Taksówkarza', 'Maksimum']
             for metric in Metric_Frame.available_metrics:
                 Metric_Frame.menu_metric.add_radiobutton(
@@ -361,7 +365,7 @@ class Title_Frame(Sidebar_Frame):
             Metric_Frame.menu_metric = tb.Menu(Metric_Frame.menubutton_metric)
 
             self.Main_Window.metric = 'Euclidean'
-
+            Metric_Frame.menubutton_metric.config(text='Choose metric')
             Metric_Frame.available_metrics = ['Euclidean', 'Manhattan', 'Maximum']
             for metric in Metric_Frame.available_metrics:
                 Metric_Frame.menu_metric.add_radiobutton(
@@ -480,7 +484,10 @@ class Dimension_Frame(Sidebar_Frame):
                 else:
                     self.Sidebar.Plot_Generation_Frame.button_generation.config(text='Oblicz liczby Bettiego')
                 
-                return True
+                if int(dim) == 0:
+                    return False
+                else:
+                    return True
         else:
             return False
 
@@ -578,7 +585,7 @@ class Vertex_Addition_Frame(Sidebar_Frame):
                    True if name is unique.
         """
 
-        if name in self.Main_Window.vertex_names:
+        if name == '' or name in self.Main_Window.vertex_names:
             return False
         else:
             return True
@@ -661,18 +668,22 @@ class Vertex_Addition_Frame(Sidebar_Frame):
 
         dim_text = self.Sidebar.Dimension_Frame.entry_dimension.get()
         dim_chosen = self.Sidebar.Dimension_Frame.validate_dimension(dim_text)
+
+        coords_txt = self.get_str_coords()
+        coords_validated = self.validate_coords(coords_txt)
         
-        if unique_name and dim_chosen:
+        if unique_name and dim_chosen and coords_validated:
             self.Main_Window.vertex_names.append(vertex_name)
             self.Main_Window.vertex_coords.append(self.get_coords())
 
             Vertex_List_Frame = self.Sidebar.Vertex_List_Frame
 
             coords_text = self.get_str_coords()
+            text = f'{vertex_name}: {coords_text}'
 
-            Vertex_List_Frame.menu_vertex.add_checkbutton(
-                label=f'{vertex_name}: {coords_text}',
-                command= lambda x=vertex_name: Vertex_List_Frame.waitlist(x)
+            Vertex_List_Frame.menu_vertex.add_radiobutton(
+                label=text,
+                command= lambda x=text: Vertex_List_Frame.waitlist(x)
             )
 
             self.clear_entries()
@@ -695,8 +706,8 @@ class Vertex_List_Frame(Sidebar_Frame):
                  Main window of the app.
     Sidebar: Sidebar
              Sidebar this frame is packed upon.
-    vertices_to_delete: list of str
-                        List of vertices to delete.
+    vertex_to_delete: list of str
+                      List of vertices to delete.
     menubutton_vertex: tb.Menubutton
                        Button for showing menu_vertex.
     menu_vertex: tb.Menu
@@ -719,7 +730,7 @@ class Vertex_List_Frame(Sidebar_Frame):
         """
 
         Sidebar_Frame.__init__(self, root)
-        self.vertices_to_delete = []
+        self.vertex_to_delete = ''
 
         self.menubutton_vertex = tb.Menubutton(self, 
                                                text='Added vertices', 
@@ -743,45 +754,43 @@ class Vertex_List_Frame(Sidebar_Frame):
         Flags or unflags vertices for deletion.        
         """
 
-        if vertex in self.vertices_to_delete:
-            self.vertices_to_delete.remove(vertex)
-        else:
-            self.vertices_to_delete.append(vertex)
+        self.vertex_to_delete = vertex
 
     def vertex_deletion(self):
         """
         Deletes flagged vertices and create new list of remaining vertices.
         """
 
-        vertex_indices = []
-        vertex_names_to_delete = [vertex_name.split(':')[0] for vertex_name in self.vertices_to_delete]
+        vertex_txt = self.vertex_to_delete
 
-        for vertex in vertex_names_to_delete:
-            index = self.Main_Window.vertex_names.index(vertex)
-            vertex_indices.append(index)
+        if vertex_txt != '':
+            vertex_name = vertex_txt.split(':')[0]
+            vertex_index = self.Main_Window.vertex_names.index(vertex_name)
 
-        for index in sorted(vertex_indices, reverse=True):
-            self.Main_Window.vertex_names.pop(index)
-            self.Main_Window.vertex_coords.pop(index)
-        
-        self.vertices_to_delete = []
+            self.Main_Window.vertex_names.pop(vertex_index)
+            self.Main_Window.vertex_coords.pop(vertex_index)
 
-        self.menu_vertex = tb.Menu(self.menubutton_vertex)
-        for index in range(len(self.Main_Window.vertex_names)):
-            vertex_name = self.Main_Window.vertex_names[index]
-            vertex_coords = self.Main_Window.vertex_coords[index]
+            self.vertex_to_delete = ''
 
-            for i in range(len(vertex_coords)-1):
-                vertex_coords[i] = vertex_coords[i]+' '
-            
-            vertex_coords = ''.join(vertex_coords)
+            self.menu_vertex = tb.Menu(self.menubutton_vertex)
 
-            self.menu_vertex.add_checkbutton(
-                label=f'{vertex_name}: {vertex_coords}',
-                command= lambda x=vertex: Vertex_List_Frame.waitlist(x)
-            )
-        
-        self.menubutton_vertex['menu'] = self.menu_vertex
+            for index in range(len(self.Main_Window.vertex_names)):
+                remaining_vertex_name = self.Main_Window.vertex_names[index]
+                remaining_vertex_coords = self.Main_Window.vertex_coords[index]
+
+                remaining_vertex_coords_txt = ''
+                for coord_index in range(len(remaining_vertex_coords)-1):
+                    remaining_vertex_coords_txt += remaining_vertex_coords[coord_index]+' '
+                remaining_vertex_coords_txt += remaining_vertex_coords[-1]
+
+                text = f'{remaining_vertex_name}: {remaining_vertex_coords_txt}'
+
+                self.menu_vertex.add_radiobutton(
+                    label=text,
+                    command= lambda x=text: self.waitlist(x)
+                )
+
+            self.menubutton_vertex['menu'] = self.menu_vertex
 
 
 class Metric_Frame(Sidebar_Frame):
@@ -896,7 +905,10 @@ class Plot_Config_Frame(Sidebar_Frame):
                  Main window of the app.
     Sidebar: Sidebar
              Sidebar this frame is packed upon.
-
+    toggle_graph: tb.Checkbutton
+                  Toggle drawing graph instead of a complex.
+    toogle_balls: tb.Checkbutton
+                  Toggle drawing balls on plot.
     """
 
     def __init__(self, root):
@@ -998,12 +1010,16 @@ class Plot_Generation_Frame(Sidebar_Frame):
         dim = self.Sidebar.Dimension_Frame.entry_dimension.get()
         dim_validated = self.Sidebar.Dimension_Frame.validate_dimension(dim)
 
-        added_vertices = len(self.Main_Window.vertex_names) > 0
+        added_vertices = self.Main_Window.vertex_names
+        if_added_vertices = len(added_vertices) > 0
 
         radius = self.Sidebar.Metric_Frame.entry_radius.get()
         radius_validated = self.Sidebar.Metric_Frame.validate_radius(radius)
 
-        if dim_validated and added_vertices and radius_validated:
+        if dim_validated and if_added_vertices and radius_validated:
+            for vertex in added_vertices:
+                if len(vertex) != int(dim):
+                    return False
             return True
         else:
             False

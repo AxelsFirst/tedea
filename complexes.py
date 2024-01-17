@@ -116,7 +116,9 @@ class VietorisRipsComplex:
             faces = []
             for simplex in higher_simplices:
                 for face in combinations(simplex, dim + 1):
-                    faces.append(list(face))
+                    faces.append(face)
+            unique_faces = set(tuple(faces))
+            faces = [[vertex for vertex in face] for face in unique_faces]
             return sorted(faces, key=lambda face: face[0])
     
     def get_all_simplices(self):
