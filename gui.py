@@ -39,6 +39,10 @@ class Main_Window(tb.Window):
                 If True then app generates plot of graph.
     draw_balls: tb.BooleanVar
                 If True then app draws balls according to the chosen metric.
+    Sidebar: Sidebar
+             Sidebar used to place Frames used for customizing simplicial complex.
+    Main_Frame: Main_Frame
+                Frame used to place other Frames displaying app output.
     """
 
     def __init__(self, themename='cerculean'):
