@@ -905,7 +905,10 @@ class Plot_Config_Frame(Sidebar_Frame):
                  Main window of the app.
     Sidebar: Sidebar
              Sidebar this frame is packed upon.
-
+    toggle_graph: tb.Checkbutton
+                  Toggle drawing graph instead of a complex.
+    toogle_balls: tb.Checkbutton
+                  Toggle drawing balls on plot.
     """
 
     def __init__(self, root):
