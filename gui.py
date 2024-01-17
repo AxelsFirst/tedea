@@ -585,7 +585,7 @@ class Vertex_Addition_Frame(Sidebar_Frame):
                    True if name is unique.
         """
 
-        if name in self.Main_Window.vertex_names:
+        if name == '' or name in self.Main_Window.vertex_names:
             return False
         else:
             return True
@@ -754,8 +754,7 @@ class Vertex_List_Frame(Sidebar_Frame):
         Flags or unflags vertices for deletion.        
         """
 
-        temp_vertex = vertex
-        self.vertex_to_delete = temp_vertex
+        self.vertex_to_delete = vertex
 
     def vertex_deletion(self):
         """
