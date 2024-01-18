@@ -1016,9 +1016,6 @@ class Plot_Generation_Frame(Sidebar_Frame):
         radius = self.Sidebar.Metric_Frame.entry_radius.get()
         radius_validated = self.Sidebar.Metric_Frame.validate_radius(radius)
 
-        print(f'dim_validated {dim_validated}')
-        print(f'if_added_vertices {if_added_vertices}')
-        print(f'radius_validated {radius_validated}')
         if dim_validated and if_added_vertices and radius_validated:
             for vertex in added_vertices:
                 if len(vertex) != int(dim):
