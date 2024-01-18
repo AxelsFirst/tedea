@@ -1,6 +1,6 @@
 import networkx as nx
 import numpy as np
-import galois as gl
+from galois import GF2
 from itertools import combinations
 from metrics import euclidean_metric
 
@@ -58,7 +58,7 @@ class VietorisRipsComplex:
         self.graph = self.construct_graph()
         self.simplices = self.get_simplices()
         self.dim = max(len(simplex) for simplex in self.simplices) - 1
-        self.field = gl.GF(2)
+        self.field = GF2
 
     def construct_graph(self):
         """
