@@ -311,7 +311,7 @@ class Title_Frame(Sidebar_Frame):
             self.side_label.config(text='Ustawienia Kompleksu Symplicjalnego')
             self.button_language.config(text='[Polski] Zmień język')
 
-            Dimension_Frame.label_dimension.config(text='Podaj wymiar wierzchołków:')
+            Dimension_Frame.label_dimension.config(text='Podaj wymiar przestrzeni:')
 
             Vertex_Addition_Frame.label_name.config(text='Podaj etykietę wierzchołka:')
             Vertex_Addition_Frame.label_coords.config(text='Podaj współrzędne wierzchołka:')
@@ -353,7 +353,7 @@ class Title_Frame(Sidebar_Frame):
             self.side_label.config(text='Simplicial Complex Settings')
             self.button_language.config(text='[English] Change language')
 
-            Dimension_Frame.label_dimension.config(text='Enter dimension of vertices:')
+            Dimension_Frame.label_dimension.config(text='Enter dimension of space:')
 
             Vertex_Addition_Frame.label_name.config(text='Enter vertex label:')
             Vertex_Addition_Frame.label_coords.config(text='Enter vertex coordinates:')
@@ -428,7 +428,7 @@ class Dimension_Frame(Sidebar_Frame):
 
         Sidebar_Frame.__init__(self, root)
 
-        self.label_dimension = tb.Label(self, text='Enter dimension of vertices:', bootstyle='inverse-light')
+        self.label_dimension = tb.Label(self, text='Enter dimension of space:', bootstyle='inverse-light')
         self.label_dimension.pack()
 
         validation_dimension = self.Main_Window.register(self.validate_dimension)
